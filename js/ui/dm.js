@@ -24,29 +24,31 @@ function groupByClient(dmRequests) {
     map.get(dm.clientName).push(dm);
   });
 
-  return Array.from(map.entries()).map(([clientName, tasks]) => {
-    const sortedTasks = sortByLatestDesc(tasks);
-    const latestTask = sortedTasks[0];
+  return Array.from(map.entries())
+    .map(([clientName, tasks]) => {
+      const sortedTasks = sortByLatestDesc(tasks);
+      const latestTask = sortedTasks[0];
 
-    let latestPreview = "신청 메시지";
-    if (latestTask.status === "completed") {
-      latestPreview = "작업 완료";
-    } else if (latestTask.savedWork) {
-      latestPreview = "작업 중";
-    }
+      let latestPreview = "신청 메시지";
+      if (latestTask.status === "completed") {
+        latestPreview = "작업 완료";
+      } else if (latestTask.savedWork) {
+        latestPreview = "작업 중";
+      }
 
-    return {
-      clientName,
-      tasks: sortedTasks,
-      latestTask,
-      latestPreview,
-      latestTime: latestTask.deliveredAt || latestTask.createdAt
-    };
-  }).sort((a, b) => {
-    const aTime = new Date(a.latestTime).getTime();
-    const bTime = new Date(b.latestTime).getTime();
-    return bTime - aTime;
-  });
+      return {
+        clientName,
+        tasks: sortedTasks,
+        latestTask,
+        latestPreview,
+        latestTime: latestTask.deliveredAt || latestTask.createdAt
+      };
+    })
+    .sort((a, b) => {
+      const aTime = new Date(a.latestTime).getTime();
+      const bTime = new Date(b.latestTime).getTime();
+      return bTime - aTime;
+    });
 }
 
 function renderClientList(clientThreads, selectedClientName) {
@@ -60,20 +62,22 @@ function renderClientList(clientThreads, selectedClientName) {
   }
 
   const itemsHtml = clientThreads
-    .map((thread) => `
-      <li
-        class="list-item ${thread.clientName === selectedClientName ? "is-selected" : ""}"
-        data-action="select-client"
-        data-client-name="${thread.clientName}"
-      >
-        <div class="list-item__title">
-          <strong>${thread.clientName}</strong>
-          <span class="status-badge">${thread.latestTask.status}</span>
-        </div>
-        <p>${thread.latestTask.subject} · ${thread.latestTask.taskTypeName || thread.latestTask.taskType}</p>
-        <p>${thread.latestPreview}</p>
-      </li>
-    `)
+    .map(
+      (thread) => `
+        <li
+          class="list-item ${thread.clientName === selectedClientName ? "is-selected" : ""}"
+          data-action="select-client"
+          data-client-name="${thread.clientName}"
+        >
+          <div class="list-item__title">
+            <strong>${thread.clientName}</strong>
+            <span class="status-badge">${thread.latestTask.status}</span>
+          </div>
+          <p>${thread.latestTask.subject} · ${thread.latestTask.taskTypeName || thread.latestTask.taskType}</p>
+          <p>${thread.latestPreview}</p>
+        </li>
+      `
+    )
     .join("");
 
   return `<ul class="list">${itemsHtml}</ul>`;
