@@ -1,4 +1,5 @@
 import { state } from "./state.js";
+
 import {
   SUBJECTS,
   TASK_TYPES,
@@ -37,42 +38,71 @@ function refreshProfileState() {
   state.profile.achievements = getAchievements(state.profile.completeCount);
 }
 
-function renderApp() {
-  const taskTypes = TASK_TYPES[state.currentSubject] || [];
+function getReviewTemplatePool(subject) {
+  if (REVIEW_TEMPLATES[subject]) {
+    return [...REVIEW_TEMPLATES[subject], ...REVIEW_TEMPLATES.common];
+  }
+  return REVIEW_TEMPLATES.common;
+}
+
+function renderCurrentPage() {
   const selectedDm = getSelectedDm();
 
-  const homeHtml = renderHome({
-    subjects: SUBJECTS,
-    currentSubject: state.currentSubject,
-    taskTypes,
-    currentTaskType: state.currentTaskType,
-    tagPool: TAG_POOL,
-    selectedTags: state.selectedTags,
-    draftInput: state.draftInput
-  });
+  if (state.currentPage === "home") {
+    const taskTypes = TASK_TYPES[state.currentSubject] || [];
 
-  const dmHtml = renderDm({
-    dmRequests: state.dmRequests,
-    selectedDmId: state.selectedDmId,
-    selectedDm
-  });
+    return renderHome({
+      subjects: SUBJECTS,
+      currentSubject: state.currentSubject,
+      taskTypes,
+      currentTaskType: state.currentTaskType,
+      tagPool: TAG_POOL,
+      selectedTags: state.selectedTags,
+      draftInput: state.draftInput
+    });
+  }
 
-  const profileHtml = renderProfile({
-    profile: state.profile,
-    reviews: state.reviews
-  });
+  if (state.currentPage === "dm") {
+    return renderDm({
+      dmRequests: state.dmRequests,
+      selectedDmId: state.selectedDmId,
+      selectedDm
+    });
+  }
 
-  const notificationsHtml = renderNotifications({
-    notifications: state.notifications,
-    reviews: state.reviews
-  });
+  if (state.currentPage === "profile") {
+    return renderProfile({
+      profile: state.profile,
+      reviews: state.reviews,
+      taskTypes: state.taskTypes
+    });
+  }
 
+  if (state.currentPage === "notifications") {
+    return renderNotifications({
+      notifications: state.notifications,
+      reviews: state.reviews
+    });
+  }
+
+  return `
+    <section class="panel">
+      <div class="empty-state">
+        <p class="empty-state__title">페이지를 찾을 수 없습니다</p>
+        <p class="empty-state__text">홈으로 돌아가 주세요.</p>
+      </div>
+    </section>
+  `;
+}
+
+function renderApp() {
   const app = document.getElementById("app");
+
+  const mainHtml = renderCurrentPage();
+
   app.innerHTML = renderLayout({
-    profileHtml,
-    homeHtml,
-    dmHtml,
-    notificationsHtml
+    currentPage: state.currentPage,
+    mainHtml
   });
 }
 
@@ -95,6 +125,7 @@ function handleCreateTask() {
   state.dmRequests = addDm(state.dmRequests, newTask);
   state.selectedDmId = newTask.id;
   state.draftInput = "";
+  state.currentPage = "dm";
 
   pushNotification("새 Task 도착", NOTIFICATION_MESSAGES.taskCreated);
 }
@@ -114,9 +145,9 @@ function handleDeliverWork(dmId) {
   if (!dm) return;
   if (dm.status === "completed") return;
 
-  const alreadyReviewed = state.reviews.some((r) => r.taskId === dmId);
+  const alreadyReviewed = state.reviews.some((review) => review.taskId === dmId);
   if (alreadyReviewed) return;
-  
+
   const workText = (dm.savedWork || "").trim();
 
   if (!workText) {
@@ -127,7 +158,8 @@ function handleDeliverWork(dmId) {
   state.dmRequests = deliverWork(state.dmRequests, dmId, workText);
 
   const deliveredDm = state.dmRequests.find((item) => item.id === dmId);
-  const review = makeReview(deliveredDm, REVIEW_TEMPLATES);
+  const reviewTemplatePool = getReviewTemplatePool(deliveredDm.subject);
+  const review = makeReview(deliveredDm, reviewTemplatePool);
 
   state.reviews.unshift(review);
   if (state.reviews.length > 10) {
@@ -150,6 +182,12 @@ function handleClick(event) {
   if (!target) return;
 
   const action = target.dataset.action;
+
+  if (action === "go-page") {
+    state.currentPage = target.dataset.page;
+    renderApp();
+    return;
+  }
 
   if (action === "change-subject") {
     const nextSubject = target.dataset.subject;
@@ -201,6 +239,7 @@ function handleClick(event) {
     const dmId = target.dataset.dmId;
     handleDeliverWork(dmId);
     renderApp();
+    return;
   }
 }
 
@@ -217,6 +256,7 @@ function handleInput(event) {
 
     state.dmRequests = state.dmRequests.map((dm) => {
       if (dm.id !== dmId) return dm;
+
       return {
         ...dm,
         savedWork: target.value
