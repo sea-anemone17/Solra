@@ -2,33 +2,58 @@ import { state } from "./state.js";
 
 import {
   SUBJECTS,
-  TASK_TYPES,
   TAG_POOL,
-  CLIENT_NAMES,
   REVIEW_TEMPLATES,
   NOTIFICATION_MESSAGES,
   DEFAULT_TASK_TYPES,
   MOCK_SOLVERS
 } from "./data.js";
 
-import { buildTask } from "./logic/task-builder.js";
-import { addDm, saveWork, deliverWork } from "./logic/dm-actions.js";
-import { makeReview } from "./logic/reviews.js";
 import { getAchievements } from "./logic/achievements.js";
 import { loadProfile } from "./sync.js";
 
-import { signUp, signIn, signOut, getCurrentUser } from "./auth.js";
-import { renderAuthPanel } from "./ui/auth-panel.js";
+import {
+  refreshAuthUser,
+  handleSignUp,
+  handleSignIn,
+  handleSignOut
+} from "./controllers/auth-controller.js";
+
+import {
+  getAvailableTaskTypes,
+  getSelectedTaskType,
+  handleChangeSubject,
+  handleToggleTag,
+  handleCreateTask
+} from "./controllers/home-controller.js";
+
+import {
+  openProfileEditor,
+  cancelProfileEdit,
+  handleSaveProfile
+} from "./controllers/profile-controller.js";
+
+import {
+  createAttachmentId,
+  handleRemoveAttachment,
+  handleSaveWork,
+  handleDeliverWork
+} from "./controllers/dm-controller.js";
+
+import {
+  resetTaskTypeEditor,
+  handleEditTaskType,
+  handleToggleTaskTypeStatus,
+  handleDeleteTaskType,
+  handleCreateTaskType
+} from "./controllers/task-type-controller.js";
 
 import { renderLayout } from "./ui/layout.js";
 import { renderHome } from "./ui/home.js";
 import { renderDm } from "./ui/dm.js";
 import { renderProfile } from "./ui/profile.js";
 import { renderNotifications } from "./ui/notifications.js";
-
-function getSelectedDm() {
-  return state.dmRequests.find((dm) => dm.id === state.selectedDmId) || null;
-}
+import { renderAuthPanel } from "./ui/auth-panel.js";
 
 function pushNotification(title, body) {
   state.notifications.unshift({ title, body });
@@ -38,100 +63,15 @@ function pushNotification(title, body) {
   }
 }
 
-async function refreshAuthUser() {
-  const { user, error } = await getCurrentUser();
-
-  if (error) {
-    state.auth.user = null;
-    state.auth.statusMessage = "사용자 확인 중 오류가 발생했습니다.";
-    return;
-  }
-
-  state.auth.user = user ?? null;
-
-  if (user?.email) {
-    state.auth.statusMessage = "계정 연결 완료";
-  }
-}
-
-async function handleSignUp() {
-  const email = state.auth.emailDraft.trim();
-  const password = state.auth.passwordDraft.trim();
-
-  if (!email || !password) {
-    state.auth.statusMessage = "이메일과 비밀번호를 입력해 주세요.";
-    return;
-  }
-
-  const { error } = await signUp(email, password, state.profile.solverName);
-
-  if (error) {
-    state.auth.statusMessage = `회원가입 실패: ${error.message}`;
-    return;
-  }
-
-  state.auth.statusMessage = "회원가입 요청이 완료되었습니다. 이메일 인증이 필요한 설정일 수도 있습니다.";
-  await refreshAuthUser();
-}
-
-async function handleSignIn() {
-  const email = state.auth.emailDraft.trim();
-  const password = state.auth.passwordDraft.trim();
-
-  if (!email || !password) {
-    state.auth.statusMessage = "이메일과 비밀번호를 입력해 주세요.";
-    return;
-  }
-
-  const { error } = await signIn(email, password);
-
-  if (error) {
-    state.auth.statusMessage = `로그인 실패: ${error.message}`;
-    return;
-  }
-
-  state.auth.statusMessage = "로그인되었습니다.";
-  await refreshAuthUser();
-}
-
-async function handleSignOut() {
-  const { error } = await signOut();
-
-  if (error) {
-    state.auth.statusMessage = `로그아웃 실패: ${error.message}`;
-    return;
-  }
-
-  state.auth.user = null;
-  state.auth.statusMessage = "로그아웃되었습니다.";
-}
-
-function createAttachmentId() {
-  return `attachment-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
-}
-
 function refreshProfileState() {
   state.profile.level = Math.floor(state.profile.xp / 30) + 1;
   state.profile.achievements = getAchievements(state.profile.completeCount);
 }
 
-function getReviewTemplatePool(subject) {
-  if (REVIEW_TEMPLATES[subject]) {
-    return [...REVIEW_TEMPLATES[subject], ...REVIEW_TEMPLATES.common];
-  }
-  return REVIEW_TEMPLATES.common;
-}
-
 function renderCurrentPage() {
   if (state.currentPage === "home") {
-    const availableTaskTypes = state.taskTypes.filter(
-      (type) => type.subject === state.currentSubject && type.status === "open"
-    );
-
-    const selectedTaskType =
-      availableTaskTypes.find((type) => type.id === state.selectedTaskTypeId) ||
-      availableTaskTypes[0] ||
-      null;
+    const availableTaskTypes = getAvailableTaskTypes(state);
+    const selectedTaskType = getSelectedTaskType(state, availableTaskTypes);
 
     if (!state.selectedTaskTypeId && selectedTaskType) {
       state.selectedTaskTypeId = selectedTaskType.id;
@@ -205,7 +145,6 @@ function renderCurrentPage() {
 
 function renderApp() {
   const app = document.getElementById("app");
-
   const mainHtml = renderCurrentPage();
 
   app.innerHTML = renderLayout({
@@ -215,198 +154,8 @@ function renderApp() {
   });
 }
 
-function handleCreateTask() {
-  const text = state.draftInput.trim();
-
-  if (!text) {
-    alert("공부 내용을 입력해 주세요.");
-    return;
-  }
-
-  const selectedTaskType = state.taskTypes.find(
-    (type) => type.id === state.selectedTaskTypeId && type.status === "open"
-  );
-
-  if (!selectedTaskType) {
-    alert("먼저 열린 Type을 선택해 주세요.");
-    return;
-  }
-
-  const mergedTags = Array.from(
-    new Set([...(selectedTaskType.tags || []), ...state.selectedTags])
-  );
-
-  const newTask = buildTask({
-    subject: state.currentSubject,
-    taskType: selectedTaskType.name,
-    tags: mergedTags,
-    userInput: text,
-    clientPool: CLIENT_NAMES[state.currentSubject]
-  });
-
-  newTask.taskTypeId = selectedTaskType.id;
-  newTask.taskTypeDescription = selectedTaskType.description || "";
-
-  state.dmRequests = addDm(state.dmRequests, newTask);
-  state.selectedDmId = newTask.id;
-  state.selectedClientName = newTask.clientName;
-  state.draftInput = "";
-  state.currentPage = "dm";
-
-  pushNotification("새 Task 도착", NOTIFICATION_MESSAGES.taskCreated);
-}
-
-function createTaskTypeId() {
-  return `task-type-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
-}
-
-function handleEditTaskType(typeId) {
-  const targetType = state.taskTypes.find((type) => type.id === typeId);
-
-  if (!targetType) return;
-
-  state.taskTypeEditor.mode = "edit";
-  state.taskTypeEditor.editingId = targetType.id;
-  state.taskTypeEditor.subjectDraft = targetType.subject;
-  state.taskTypeEditor.nameDraft = targetType.name;
-  state.taskTypeEditor.descriptionDraft = targetType.description || "";
-  state.taskTypeEditor.tagsDraft = (targetType.tags || []).join(", ");
-}
-
-function handleToggleTaskTypeStatus(typeId) {
-  state.taskTypes = state.taskTypes.map((type) => {
-    if (type.id !== typeId) return type;
-
-    return {
-      ...type,
-      status: type.status === "open" ? "closed" : "open"
-    };
-  });
-
-  if (state.taskTypeEditor.editingId === typeId) {
-    const updatedType = state.taskTypes.find((type) => type.id === typeId);
-
-    if (updatedType) {
-      state.taskTypeEditor.subjectDraft = updatedType.subject;
-      state.taskTypeEditor.nameDraft = updatedType.name;
-      state.taskTypeEditor.descriptionDraft = updatedType.description || "";
-      state.taskTypeEditor.tagsDraft = (updatedType.tags || []).join(", ");
-    }
-  }
-}
-
-function handleDeleteTaskType(typeId) {
-  const isEditingCurrent = state.taskTypeEditor.editingId === typeId;
-
-  state.taskTypes = state.taskTypes.filter((type) => type.id !== typeId);
-
-  if (isEditingCurrent) {
-    resetTaskTypeEditor();
-  }
-}
-
-function resetTaskTypeEditor() {
-  state.taskTypeEditor.mode = "create";
-  state.taskTypeEditor.editingId = null;
-  state.taskTypeEditor.subjectDraft = state.currentSubject;
-  state.taskTypeEditor.nameDraft = "";
-  state.taskTypeEditor.descriptionDraft = "";
-  state.taskTypeEditor.tagsDraft = "";
-}
-
-function handleCreateTaskType() {
-  const subject = state.taskTypeEditor.subjectDraft;
-  const name = state.taskTypeEditor.nameDraft.trim();
-  const description = state.taskTypeEditor.descriptionDraft.trim();
-  const tags = state.taskTypeEditor.tagsDraft
-    .split(",")
-    .map((tag) => tag.trim())
-    .filter(Boolean);
-
-  if (!name) {
-    alert("Type 이름을 입력해 주세요.");
-    return;
-  }
-
-  if (state.taskTypeEditor.mode === "edit" && state.taskTypeEditor.editingId) {
-    state.taskTypes = state.taskTypes.map((type) => {
-      if (type.id !== state.taskTypeEditor.editingId) return type;
-
-      return {
-        ...type,
-        subject,
-        name,
-        description,
-        tags
-      };
-    });
-
-    resetTaskTypeEditor();
-    return;
-  }
-
-  const newType = {
-    id: createTaskTypeId(),
-    subject,
-    name,
-    description,
-    tags,
-    status: "open"
-  };
-
-  state.taskTypes = [newType, ...state.taskTypes];
-  resetTaskTypeEditor();
-}
-
-function handleSaveWork(dmId) {
-  const dm = state.dmRequests.find((item) => item.id === dmId);
-
-  if (!dm) return;
-
-  state.dmRequests = saveWork(state.dmRequests, dmId, dm.savedWork || "");
-  pushNotification("작업물 저장", NOTIFICATION_MESSAGES.workSaved);
-}
-
-function handleDeliverWork(dmId) {
-  const dm = state.dmRequests.find((item) => item.id === dmId);
-
-  if (!dm) return;
-  if (dm.status === "completed") return;
-
-  const alreadyReviewed = state.reviews.some((review) => review.taskId === dmId);
-  if (alreadyReviewed) return;
-
-  const workText = (dm.savedWork || "").trim();
-
-  if (!workText) {
-    alert("전달할 작업물을 입력해 주세요.");
-    return;
-  }
-
-  state.dmRequests = deliverWork(state.dmRequests, dmId, workText);
-
-  const deliveredDm = state.dmRequests.find((item) => item.id === dmId);
-  const reviewTemplatePool = getReviewTemplatePool(deliveredDm.subject);
-  const review = makeReview(deliveredDm, reviewTemplatePool);
-
-  state.reviews.unshift(review);
-  if (state.reviews.length > 10) {
-    state.reviews.pop();
-  }
-
-  state.profile.reviewCount += 1;
-  state.profile.xp += 10;
-  state.profile.completeCount += 1;
-
-  refreshProfileState();
-
-  pushNotification("작업물 전달", NOTIFICATION_MESSAGES.workDelivered);
-  pushNotification("후기 도착", NOTIFICATION_MESSAGES.reviewArrived);
-}
-
 function handleClick(event) {
   const target = event.target.closest("[data-action]");
-
   if (!target) return;
 
   const action = target.dataset.action;
@@ -418,17 +167,17 @@ function handleClick(event) {
   }
 
   if (action === "sign-up") {
-    handleSignUp().then(() => renderApp());
+    handleSignUp(state).then(() => renderApp());
     return;
   }
 
   if (action === "sign-in") {
-    handleSignIn().then(() => renderApp());
+    handleSignIn(state).then(() => renderApp());
     return;
   }
 
   if (action === "sign-out") {
-    handleSignOut().then(() => renderApp());
+    handleSignOut(state).then(() => renderApp());
     return;
   }
 
@@ -445,57 +194,33 @@ function handleClick(event) {
   }
 
   if (action === "remove-attachment") {
-    const dmId = target.dataset.dmId;
-    const attachmentId = target.dataset.attachmentId;
-
-    state.dmRequests = state.dmRequests.map((dm) => {
-      if (dm.id !== dmId) return dm;
-
-      return {
-        ...dm,
-        attachments: (dm.attachments || []).filter(
-          (file) => file.id !== attachmentId
-        )
-      };
-    });
-
+    handleRemoveAttachment(
+      state,
+      target.dataset.dmId,
+      target.dataset.attachmentId
+    );
     renderApp();
     return;
   }
 
   if (action === "change-subject") {
-    const nextSubject = target.dataset.subject;
-    state.currentSubject = nextSubject;
-
-    const nextAvailableTaskTypes = state.taskTypes.filter(
-      (type) => type.subject === nextSubject && type.status === "open"
-    );
-    state.selectedTaskTypeId = nextAvailableTaskTypes[0]?.id || null;
-
-    const nextMarketSolvers = MOCK_SOLVERS.filter(
-      (solver) => solver.subject === nextSubject
-    );
-    state.selectedMarketSolverId = nextMarketSolvers[0]?.id || null;
-
+    handleChangeSubject(state, target.dataset.subject, MOCK_SOLVERS);
     renderApp();
     return;
   }
 
   if (action === "toggle-tag") {
-    const tag = target.dataset.tag;
-
-    if (state.selectedTags.includes(tag)) {
-      state.selectedTags = state.selectedTags.filter((item) => item !== tag);
-    } else {
-      state.selectedTags = [...state.selectedTags, tag];
-    }
-
+    handleToggleTag(state, target.dataset.tag);
     renderApp();
     return;
   }
 
   if (action === "create-task") {
-    handleCreateTask();
+    handleCreateTask(
+      state,
+      pushNotification,
+      NOTIFICATION_MESSAGES.taskCreated
+    );
     renderApp();
     return;
   }
@@ -513,117 +238,75 @@ function handleClick(event) {
   }
 
   if (action === "save-work") {
-    const dmId = target.dataset.dmId;
-    handleSaveWork(dmId);
+    handleSaveWork(
+      state,
+      target.dataset.dmId,
+      pushNotification,
+      NOTIFICATION_MESSAGES.workSaved
+    );
     renderApp();
     return;
   }
 
   if (action === "deliver-work") {
-    const dmId = target.dataset.dmId;
-    handleDeliverWork(dmId);
+    handleDeliverWork(
+      state,
+      target.dataset.dmId,
+      pushNotification,
+      refreshProfileState,
+      REVIEW_TEMPLATES,
+      NOTIFICATION_MESSAGES
+    );
     renderApp();
     return;
   }
 
   if (action === "open-profile-editor") {
-    state.profileEditor.isOpen = true;
-    state.profileEditor.nameDraft = state.profile.solverName;
-    state.profileEditor.bioDraft = state.profile.bio;
-    state.profileEditor.tagsDraft = state.profile.tags.join(", ");
+    openProfileEditor(state);
     renderApp();
     return;
   }
 
   if (action === "cancel-profile-edit") {
-    state.profileEditor.isOpen = false;
+    cancelProfileEdit(state);
     renderApp();
     return;
   }
 
   if (action === "save-profile") {
-    const name = state.profileEditor.nameDraft.trim();
-    const bio = state.profileEditor.bioDraft.trim();
-    const tags = state.profileEditor.tagsDraft
-      .split(",")
-      .map((tag) => tag.trim())
-      .filter(Boolean);
-
-    if (!name) {
-      alert("이름을 입력해 주세요.");
-      return;
-    }
-
-    state.profile.solverName = name;
-    state.profile.bio = bio || "소개가 없습니다.";
-    state.profile.tags = tags;
-
-    if (!state.auth.user) {
-      state.auth.statusMessage = "로그인 후 프로필을 저장할 수 있습니다.";
-      state.profileEditor.isOpen = false;
-      renderApp();
-      return;
-    }
-
-    saveProfile(state.auth.user.id, state.profile).then(({ data, error }) => {
-      if (error) {
-        state.auth.statusMessage = `프로필 저장 실패: ${error.message}`;
-        renderApp();
-        return;
-      }
-
-      if (data) {
-        state.profile.solverName = data.solver_name ?? state.profile.solverName;
-        state.profile.bio = data.bio ?? state.profile.bio;
-        state.profile.tags = data.tags ?? state.profile.tags;
-        state.profile.avatarUrl = data.avatar_path ?? state.profile.avatarUrl;
-        state.profile.level = data.level ?? state.profile.level;
-        state.profile.xp = data.xp ?? state.profile.xp;
-        state.profile.completeCount = data.complete_count ?? state.profile.completeCount;
-        state.profile.reviewCount = data.review_count ?? state.profile.reviewCount;
-      }
-
-      state.profileEditor.isOpen = false;
-      state.auth.statusMessage = "프로필이 저장되었습니다.";
-      renderApp();
-    });
-
+    handleSaveProfile(state).then(() => renderApp());
     return;
   }
 
   if (action === "create-task-type") {
-    handleCreateTaskType();
+    handleCreateTaskType(state);
     renderApp();
     return;
   }
 
   if (action === "edit-task-type") {
-    const typeId = target.dataset.typeId;
-    handleEditTaskType(typeId);
+    handleEditTaskType(state, target.dataset.typeId);
     renderApp();
     return;
   }
 
   if (action === "cancel-task-type-edit") {
-    resetTaskTypeEditor();
+    resetTaskTypeEditor(state);
     renderApp();
     return;
   }
 
   if (action === "toggle-task-type-status") {
-    const typeId = target.dataset.typeId;
-    handleToggleTaskTypeStatus(typeId);
+    handleToggleTaskTypeStatus(state, target.dataset.typeId);
     renderApp();
     return;
   }
 
   if (action === "delete-task-type") {
-    const typeId = target.dataset.typeId;
     const confirmed = window.confirm("이 Type을 삭제하시겠습니까?");
-
     if (!confirmed) return;
 
-    handleDeleteTaskType(typeId);
+    handleDeleteTaskType(state, target.dataset.typeId);
     renderApp();
     return;
   }
@@ -655,7 +338,7 @@ function handleInput(event) {
     state.taskTypeEditor.subjectDraft = target.value;
     return;
   }
-  
+
   if (target.dataset.action === "update-type-name") {
     state.taskTypeEditor.nameDraft = target.value;
     return;
@@ -708,7 +391,9 @@ function handleInput(event) {
       state.dmRequests = state.dmRequests.map((dm) => {
         if (dm.id !== dmId) return dm;
 
-        const nextAttachments = Array.isArray(dm.attachments) ? [...dm.attachments] : [];
+        const nextAttachments = Array.isArray(dm.attachments)
+          ? [...dm.attachments]
+          : [];
 
         nextAttachments.push({
           id: createAttachmentId(),
@@ -741,10 +426,6 @@ async function init() {
     state.taskTypes = [...DEFAULT_TASK_TYPES];
   }
 
-  if (!state.currentTaskType) {
-    state.currentTaskType = TASK_TYPES[state.currentSubject][0];
-  }
-
   if (!state.selectedMarketSolverId) {
     const initialMarketSolvers = MOCK_SOLVERS.filter(
       (solver) => solver.subject === state.currentSubject
@@ -752,25 +433,36 @@ async function init() {
     state.selectedMarketSolverId = initialMarketSolvers[0]?.id || null;
   }
 
+  const initialAvailableTaskTypes = getAvailableTaskTypes(state);
+  if (!state.selectedTaskTypeId) {
+    state.selectedTaskTypeId = initialAvailableTaskTypes[0]?.id || null;
+  }
+
   refreshProfileState();
   renderApp();
 
-  await refreshAuthUser();
+  await refreshAuthUser(state);
 
   if (state.auth.user) {
-    const { data: profileData, error: profileError } = await loadProfile(state.auth.user.id);
+    const { data: profileData, error: profileError } = await loadProfile(
+      state.auth.user.id
+    );
 
     if (profileError) {
       state.auth.statusMessage = `프로필 로드 실패: ${profileError.message}`;
     } else if (profileData) {
-      state.profile.solverName = profileData.solver_name ?? state.profile.solverName;
+      state.profile.solverName =
+        profileData.solver_name ?? state.profile.solverName;
       state.profile.bio = profileData.bio ?? state.profile.bio;
       state.profile.tags = profileData.tags ?? state.profile.tags;
-      state.profile.avatarUrl = profileData.avatar_path ?? state.profile.avatarUrl;
+      state.profile.avatarUrl =
+        profileData.avatar_path ?? state.profile.avatarUrl;
       state.profile.level = profileData.level ?? state.profile.level;
       state.profile.xp = profileData.xp ?? state.profile.xp;
-      state.profile.completeCount = profileData.complete_count ?? state.profile.completeCount;
-      state.profile.reviewCount = profileData.review_count ?? state.profile.reviewCount;
+      state.profile.completeCount =
+        profileData.complete_count ?? state.profile.completeCount;
+      state.profile.reviewCount =
+        profileData.review_count ?? state.profile.reviewCount;
     }
   }
 
