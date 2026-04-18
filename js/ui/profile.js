@@ -242,34 +242,50 @@ function renderTaskTypeList(taskTypes) {
         ${
           taskTypes.length
             ? taskTypes
-                .map(
-                  (type) => `
-                    <div class="card">
-                      <div class="list-item__title">
-                        <strong>${type.name}</strong>
-                        <span class="status-badge">${type.status}</span>
-                      </div>
-
-                      <p class="muted">${type.subject}</p>
-                      <p class="muted">${type.description || "설명이 없습니다."}</p>
-
-                      <div class="chip-list">
-                        ${(type.tags || []).map((tag) => `<span class="chip">#${tag}</span>`).join("")}
-                      </div>
-
-                      <div class="button-row" style="margin-top: 12px;">
-                        <button
-                          class="btn btn--ghost"
-                          data-action="edit-task-type"
-                          data-type-id="${type.id}"
-                          type="button"
-                        >
-                          수정
-                        </button>
-                      </div>
+                .map((type) => `
+                  <div class="card">
+                    <div class="list-item__title">
+                      <strong>${type.name}</strong>
+                      <span class="status-badge">${type.status === "open" ? "open" : "closed"}</span>
                     </div>
-                  `
-                )
+
+                    <p class="muted">${type.subject}</p>
+                    <p class="muted">${type.description || "설명이 없습니다."}</p>
+
+                    <div class="chip-list">
+                      ${(type.tags || []).map((tag) => `<span class="chip">#${tag}</span>`).join("")}
+                    </div>
+
+                    <div class="button-row" style="margin-top: 12px;">
+                      <button
+                        class="btn btn--ghost"
+                        data-action="edit-task-type"
+                        data-type-id="${type.id}"
+                        type="button"
+                      >
+                        수정
+                      </button>
+
+                      <button
+                        class="btn btn--secondary"
+                        data-action="toggle-task-type-status"
+                        data-type-id="${type.id}"
+                        type="button"
+                      >
+                        ${type.status === "open" ? "닫기" : "다시 열기"}
+                      </button>
+
+                      <button
+                        class="btn btn--ghost"
+                        data-action="delete-task-type"
+                        data-type-id="${type.id}"
+                        type="button"
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  </div>
+                `)
                 .join("")
             : `
               <div class="empty-state">
