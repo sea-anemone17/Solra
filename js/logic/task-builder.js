@@ -20,6 +20,7 @@ export function buildTask({ subject, taskType, tags, userInput, clientPool }) {
     deliveredWork: "",
     status: "new",
     createdAt: new Date().toISOString(),
-    deliveredAt: null
+    deliveredAt: null,
+    attachments: []
   };
 }
