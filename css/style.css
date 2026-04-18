@@ -827,3 +827,13 @@ img {
 .dm-message__body {
   font-size: 14px;
 }
+
+.market-card {
+  width: 100%;
+  text-align: left;
+}
+
+.market-card.is-selected {
+  border-color: var(--accent-strong);
+  background: #f3fbf4;
+}
