@@ -1,0 +1,163 @@
+/* =========================
+   BASE / RESET / TOKENS
+========================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  /* Base */
+  --bg: #f5f7f4;
+  --bg-elevated: #eef2ee;
+  --surface: #ffffff;
+  --surface-2: #fafcf9;
+  --surface-3: #f1f4f1;
+
+  /* Line */
+  --line: #e3e8e3;
+  --line-strong: #d4dbd4;
+
+  /* Text */
+  --text: #111614;
+  --text-soft: #5f6b63;
+  --text-faint: #8b958e;
+
+  /* Accent */
+  --accent: #34c759;
+  --accent-strong: #28a745;
+  --accent-deep: #1f7a3c;
+  --accent-soft: #eaf7ee;
+
+  /* Highlight */
+  --highlight: #ffd966;
+  --highlight-soft: #fff6d8;
+  --highlight-deep: #9b7a00;
+
+  /* Danger */
+  --danger: #ff5f57;
+  --danger-soft: #fff1f0;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 10px rgba(17, 22, 20, 0.04);
+  --shadow-md: 0 12px 28px rgba(17, 22, 20, 0.06);
+
+  /* Radius */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+
+  /* Typography */
+  --font-body: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #fbfcfa 0%, var(--bg) 100%);
+  color: var(--text);
+  font-family: var(--font-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: 0;
+  background: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+.boot-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-6);
+}
+
+.boot-card {
+  width: min(100%, 480px);
+  padding: var(--space-7);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+}
+
+.boot-eyebrow {
+  margin: 0 0 var(--space-2);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--accent-deep);
+}
+
+.boot-title {
+  margin: 0 0 var(--space-3);
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.boot-text {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.95rem;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+}
+
+.muted {
+  color: var(--text-soft);
+}
+
+.faint {
+  color: var(--text-faint);
+}
