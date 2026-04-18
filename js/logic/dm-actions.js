@@ -18,6 +18,10 @@ export function deliverWork(dmRequests, dmId, text) {
   return dmRequests.map((dm) => {
     if (dm.id !== dmId) return dm;
 
+    if (dm.status === "completed") {
+      return dm;
+    }
+
     return {
       ...dm,
       savedWork: text,
