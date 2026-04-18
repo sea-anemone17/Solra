@@ -1,11 +1,11 @@
-import { state } from "./state.js";
 import {
   SUBJECTS,
   TASK_TYPES,
   TAG_POOL,
   CLIENT_NAMES,
   REVIEW_TEMPLATES,
-  NOTIFICATION_MESSAGES
+  NOTIFICATION_MESSAGES,
+  DEFAULT_TASK_TYPES
 } from "./data.js";
 
 import { buildTask } from "./logic/task-builder.js";
@@ -223,11 +223,12 @@ function init() {
 
   if (state.taskTypes.length === 0) {
     state.taskTypes = [...DEFAULT_TASK_TYPES];
-    state.currentTaskTypeId = state.taskTypes[0]?.id || null;
+  }
+
+  if (!state.currentTaskType) {
+    state.currentTaskType = TASK_TYPES[state.currentSubject][0];
   }
 
   refreshProfileState();
   renderApp();
 }
-
-init();
