@@ -386,3 +386,7 @@
     box-shadow var(--motion-fast) var(--ease-standard),
     transform var(--motion-fast) var(--ease-soft);
 }
+
+.panel {
+  animation: fadeUp var(--motion-slow) var(--ease-soft);
+}
