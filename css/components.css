@@ -126,9 +126,10 @@
 }
 
 .field-label {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-weight: 700;
-  color: var(--text-soft);
+  color: var(--text-strong);
+  margin-bottom: 2px;
 }
 
 .input,
