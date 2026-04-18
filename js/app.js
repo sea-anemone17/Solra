@@ -11,6 +11,8 @@ import {
   renderReview,
   renderStatus,
   renderProfile,
+  fillProfileEditor,
+  setProfileEditorVisible,
   renderAchievements,
   renderLatestReview,
   renderMarketPreview,
@@ -22,6 +24,14 @@ const questInput = document.getElementById("questInput");
 const generateBtn = document.getElementById("generateBtn");
 const completeBtn = document.getElementById("completeBtn");
 const resetBtn = document.getElementById("resetBtn");
+
+const editProfileBtn = document.getElementById("editProfileBtn");
+const saveProfileBtn = document.getElementById("saveProfileBtn");
+const cancelProfileBtn = document.getElementById("cancelProfileBtn");
+
+const solverNameInput = document.getElementById("solverNameInput");
+const solverBioInput = document.getElementById("solverBioInput");
+const solverTagsInput = document.getElementById("solverTagsInput");
 
 const state = {
   solverName: "Hazel",
@@ -35,7 +45,8 @@ const state = {
   unlockedAchievementIds: new Set(),
   unlockedAchievements: [],
   recentReviews: [],
-  socialLogs: []
+  socialLogs: [],
+  isProfileEditing: false
 };
 
 function pickRandom(array) {
@@ -94,9 +105,52 @@ function updateAllUI() {
   renderAchievements(state.unlockedAchievements);
   renderLatestReview(state.recentReviews[0] || "");
   refreshMarketPreview();
+  setProfileEditorVisible(state.isProfileEditing);
+
+  if (state.isProfileEditing) {
+    fillProfileEditor(state);
+  }
+}
+
+function openProfileEditor() {
+  state.isProfileEditing = true;
+  updateAllUI();
+}
+
+function closeProfileEditor() {
+  state.isProfileEditing = false;
+  updateAllUI();
+}
+
+function parseTags(inputText) {
+  return inputText
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .slice(0, 3);
+}
+
+function saveProfile() {
+  const nextName = solverNameInput.value.trim();
+  const nextBio = solverBioInput.value.trim();
+  const nextTags = parseTags(solverTagsInput.value.trim());
+
+  if (!nextName) {
+    alert("Solver 이름을 입력해 주세요.");
+    return;
+  }
+
+  state.solverName = nextName;
+  state.solverBio = nextBio || "소개가 아직 없습니다.";
+  state.strongTags = nextTags.length ? nextTags : ["태그없음"];
+
+  closeProfileEditor();
 }
 
 function resetAll() {
+  state.solverName = "Hazel";
+  state.solverBio = "이해가 되는 설명을 지향합니다.";
+  state.strongTags = ["개념 정리", "구조화", "시험 대비"];
   state.currentRequest = null;
   state.xp = 0;
   state.level = 1;
@@ -106,6 +160,7 @@ function resetAll() {
   state.unlockedAchievements = [];
   state.recentReviews = [];
   state.socialLogs = [];
+  state.isProfileEditing = false;
 
   questInput.value = "";
   completeBtn.disabled = true;
@@ -158,6 +213,18 @@ completeBtn.addEventListener("click", () => {
 
 resetBtn.addEventListener("click", () => {
   resetAll();
+});
+
+editProfileBtn.addEventListener("click", () => {
+  openProfileEditor();
+});
+
+saveProfileBtn.addEventListener("click", () => {
+  saveProfile();
+});
+
+cancelProfileBtn.addEventListener("click", () => {
+  closeProfileEditor();
 });
 
 resetRequestCard();
