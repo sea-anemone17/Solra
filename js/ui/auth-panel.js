@@ -17,39 +17,28 @@ export function renderAuthPanel({ auth }) {
 
   if (isLoggedIn) {
     return `
-      <section class="panel">
-        <div class="panel-header">
-          <div class="panel-header__text">
-            <p class="section-eyebrow">AUTH</p>
-            <h2 class="panel-title">인증 상태</h2>
-            <p class="panel-subtitle">현재 계정으로 데이터가 동기화됩니다.</p>
-          </div>
-        </div>
-
-        <div class="detail-card">
-          <div class="card">
-            <strong>로그인됨</strong>
-            <p class="muted">${maskedEmail}</p>
+      <section class="panel account-panel">
+        <div class="account-row">
+          <div class="account-info">
+            <span class="badge-featured">연결됨</span>
+            <strong class="account-email">${maskedEmail}</strong>
+            ${
+              auth.statusMessage
+                ? `<span class="account-status-text">${auth.statusMessage}</span>`
+                : ""
+            }
           </div>
 
-          ${
-            auth.statusMessage
-              ? `<div class="card"><p class="muted">${auth.statusMessage}</p></div>`
-              : ""
-          }
-
-          <div class="button-row">
-            <button class="btn btn--ghost" data-action="sign-out" type="button">
-              로그아웃
-            </button>
-          </div>
+          <button class="btn btn--ghost" data-action="sign-out" type="button">
+            로그아웃
+          </button>
         </div>
       </section>
     `;
   }
 
   return `
-    <section class="panel">
+    <section class="panel account-panel">
       <div class="panel-header">
         <div class="panel-header__text">
           <p class="section-eyebrow">AUTH</p>
