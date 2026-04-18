@@ -48,6 +48,18 @@
   --transition-fast: 0.18s ease;
   --transition-base: 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 
+   /* Motion */
+  --motion-fast: 0.14s;
+  --motion-base: 0.22s;
+  --motion-slow: 0.32s;
+
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  --lift-y: -1px;
+  --press-scale: 0.98;
+
   /* Typography */
   --font-body: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
 }
