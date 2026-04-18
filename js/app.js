@@ -215,20 +215,17 @@ function handleInput(event) {
   }
 }
 
-function init() {
+function showError(err) {
   const app = document.getElementById("app");
+  app.innerHTML = `
+    <pre style="padding:16px; color:#b00020; white-space:pre-wrap; font-size:14px; line-height:1.5;">
+${err && err.stack ? err.stack : err}
+    </pre>
+  `;
+}
 
-  app.addEventListener("click", handleClick);
-  app.addEventListener("input", handleInput);
-
-  if (state.taskTypes.length === 0) {
-    state.taskTypes = [...DEFAULT_TASK_TYPES];
-  }
-
-  if (!state.currentTaskType) {
-    state.currentTaskType = TASK_TYPES[state.currentSubject][0];
-  }
-
-  refreshProfileState();
-  renderApp();
+try {
+  init();
+} catch (err) {
+  showError(err);
 }
