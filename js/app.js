@@ -16,6 +16,7 @@ import { addDm, saveWork, deliverWork } from "./logic/dm-actions.js";
 import { makeReview } from "./logic/reviews.js";
 import { getAchievements } from "./logic/achievements.js";
 import { getCurrentUser } from "./auth.js";
+import { loadProfile } from "./sync.js";
 
 import { renderLayout } from "./ui/layout.js";
 import { renderHome } from "./ui/home.js";
@@ -428,8 +429,25 @@ async function init() {
 
   if (error) {
     console.error("사용자 확인 실패:", error);
+  }
+
+  if (user) {
+    const { data: profileData, error: profileError } = await loadProfile(user.id);
+
+    if (profileError) {
+      console.error("프로필 로드 실패:", profileError);
+    } else if (profileData) {
+      state.profile.solverName = profileData.solver_name ?? state.profile.solverName;
+      state.profile.bio = profileData.bio ?? state.profile.bio;
+      state.profile.tags = profileData.tags ?? state.profile.tags;
+      state.profile.avatarUrl = profileData.avatar_path ?? "";
+      state.profile.level = profileData.level ?? state.profile.level;
+      state.profile.xp = profileData.xp ?? state.profile.xp;
+      state.profile.completeCount = profileData.complete_count ?? state.profile.completeCount;
+      state.profile.reviewCount = profileData.review_count ?? state.profile.reviewCount;
+    }
   } else {
-    console.log("현재 사용자:", user);
+    console.log("로그인된 사용자가 없습니다.");
   }
 
   refreshProfileState();
