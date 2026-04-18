@@ -1,59 +1,78 @@
-import { saveProfile } from "../sync.js";
+import { saveWork, deliverWork } from "../logic/dm-actions.js";
+import { makeReview } from "../logic/reviews.js";
 
-export function openProfileEditor(state) {
-  state.profileEditor.isOpen = true;
-  state.profileEditor.nameDraft = state.profile.solverName;
-  state.profileEditor.bioDraft = state.profile.bio;
-  state.profileEditor.tagsDraft = state.profile.tags.join(", ");
+function getReviewTemplatePool(reviewTemplates, subject) {
+  if (reviewTemplates[subject]) {
+    return [...reviewTemplates[subject], ...reviewTemplates.common];
+  }
+  return reviewTemplates.common;
 }
 
-export function cancelProfileEdit(state) {
-  state.profileEditor.isOpen = false;
+export function createAttachmentId() {
+  return `attachment-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 }
 
-export async function handleSaveProfile(state) {
-  const name = state.profileEditor.nameDraft.trim();
-  const bio = state.profileEditor.bioDraft.trim();
-  const tags = state.profileEditor.tagsDraft
-    .split(",")
-    .map((tag) => tag.trim())
-    .filter(Boolean);
+export function handleRemoveAttachment(state, dmId, attachmentId) {
+  state.dmRequests = state.dmRequests.map((dm) => {
+    if (dm.id !== dmId) return dm;
 
-  if (!name) {
-    alert("이름을 입력해 주세요.");
+    return {
+      ...dm,
+      attachments: (dm.attachments || []).filter(
+        (file) => file.id !== attachmentId
+      )
+    };
+  });
+}
+
+export function handleSaveWork(state, dmId, pushNotification, workSavedMessage) {
+  const dm = state.dmRequests.find((item) => item.id === dmId);
+  if (!dm) return;
+
+  state.dmRequests = saveWork(state.dmRequests, dmId, dm.savedWork || "");
+  pushNotification("작업물 저장", workSavedMessage);
+}
+
+export function handleDeliverWork(
+  state,
+  dmId,
+  pushNotification,
+  refreshProfileState,
+  reviewTemplates,
+  messages
+) {
+  const dm = state.dmRequests.find((item) => item.id === dmId);
+
+  if (!dm) return;
+  if (dm.status === "completed") return;
+
+  const alreadyReviewed = state.reviews.some((review) => review.taskId === dmId);
+  if (alreadyReviewed) return;
+
+  const workText = (dm.savedWork || "").trim();
+
+  if (!workText) {
+    alert("전달할 작업물을 입력해 주세요.");
     return;
   }
 
-  state.profile.solverName = name;
-  state.profile.bio = bio || "소개가 없습니다.";
-  state.profile.tags = tags;
+  state.dmRequests = deliverWork(state.dmRequests, dmId, workText);
 
-  if (!state.auth.user) {
-    state.auth.statusMessage = "로그인 후 프로필을 저장할 수 있습니다.";
-    state.profileEditor.isOpen = false;
-    return;
+  const deliveredDm = state.dmRequests.find((item) => item.id === dmId);
+  const reviewTemplatePool = getReviewTemplatePool(reviewTemplates, deliveredDm.subject);
+  const review = makeReview(deliveredDm, reviewTemplatePool);
+
+  state.reviews.unshift(review);
+  if (state.reviews.length > 10) {
+    state.reviews.pop();
   }
 
-  const { data, error } = await saveProfile(state.auth.user.id, state.profile);
+  state.profile.reviewCount += 1;
+  state.profile.xp += 10;
+  state.profile.completeCount += 1;
 
-  if (error) {
-    state.auth.statusMessage = `프로필 저장 실패: ${error.message}`;
-    return;
-  }
+  refreshProfileState();
 
-  if (data) {
-    state.profile.solverName = data.solver_name ?? state.profile.solverName;
-    state.profile.bio = data.bio ?? state.profile.bio;
-    state.profile.tags = data.tags ?? state.profile.tags;
-    state.profile.avatarUrl = data.avatar_path ?? state.profile.avatarUrl;
-    state.profile.level = data.level ?? state.profile.level;
-    state.profile.xp = data.xp ?? state.profile.xp;
-    state.profile.completeCount =
-      data.complete_count ?? state.profile.completeCount;
-    state.profile.reviewCount =
-      data.review_count ?? state.profile.reviewCount;
-  }
-
-  state.profileEditor.isOpen = false;
-  state.auth.statusMessage = "프로필이 저장되었습니다.";
+  pushNotification("작업물 전달", messages.workDelivered);
+  pushNotification("후기 도착", messages.reviewArrived);
 }
