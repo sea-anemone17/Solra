@@ -46,8 +46,6 @@ function getReviewTemplatePool(subject) {
 }
 
 function renderCurrentPage() {
-  const selectedDm = getSelectedDm();
-
   if (state.currentPage === "home") {
     const taskTypes = TASK_TYPES[state.currentSubject] || [];
 
@@ -74,7 +72,8 @@ function renderCurrentPage() {
     return renderProfile({
       profile: state.profile,
       reviews: state.reviews,
-      taskTypes: state.taskTypes
+      taskTypes: state.taskTypes,
+      profileEditor: state.profileEditor
     });
   }
 
@@ -248,6 +247,43 @@ function handleClick(event) {
     renderApp();
     return;
   }
+
+  if (action === "open-profile-editor") {
+    state.profileEditor.isOpen = true;
+    state.profileEditor.nameDraft = state.profile.solverName;
+    state.profileEditor.bioDraft = state.profile.bio;
+    state.profileEditor.tagsDraft = state.profile.tags.join(", ");
+    renderApp();
+    return;
+  }
+
+  if (action === "cancel-profile-edit") {
+    state.profileEditor.isOpen = false;
+    renderApp();
+    return;
+  }
+
+  if (action === "save-profile") {
+    const name = state.profileEditor.nameDraft.trim();
+    const bio = state.profileEditor.bioDraft.trim();
+    const tags = state.profileEditor.tagsDraft
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+
+    if (!name) {
+      alert("이름을 입력해 주세요.");
+      return;
+    }
+
+    state.profile.solverName = name;
+    state.profile.bio = bio || "소개가 없습니다.";
+    state.profile.tags = tags;
+
+    state.profileEditor.isOpen = false;
+    renderApp();
+    return;
+  }
 }
 
 function handleInput(event) {
@@ -269,6 +305,22 @@ function handleInput(event) {
         savedWork: target.value
       };
     });
+    return;
+  }
+
+  if (target.dataset.action === "update-profile-name") {
+    state.profileEditor.nameDraft = target.value;
+    return;
+  }
+
+  if (target.dataset.action === "update-profile-bio") {
+    state.profileEditor.bioDraft = target.value;
+    return;
+  }
+
+  if (target.dataset.action === "update-profile-tags") {
+    state.profileEditor.tagsDraft = target.value;
+    return;
   }
 }
 
