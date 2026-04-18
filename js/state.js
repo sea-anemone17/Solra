@@ -4,6 +4,7 @@ export const state = {
   currentSubject: "수학",
   currentTaskTypeId: null,
   currentTaskType: "문제 풀이",
+  selectedTaskTypeId: null,
   selectedTags: ["고2"],
 
   draftInput: "",
