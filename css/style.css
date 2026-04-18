@@ -1,0 +1,57 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Pretendard", sans-serif;
+  background: #f6f7fb;
+  color: #222;
+}
+
+.app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.topbar {
+  margin-bottom: 24px;
+}
+
+.main-layout {
+  display: grid;
+  gap: 16px;
+}
+
+section {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+button {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+#requestCard,
+#reviewCard {
+  min-height: 80px;
+  padding: 14px;
+  background: #f2f4f8;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  white-space: pre-line;
+}
