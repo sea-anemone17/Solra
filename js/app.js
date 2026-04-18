@@ -124,13 +124,19 @@ function getReviewTemplatePool(subject) {
 
 function renderCurrentPage() {
   if (state.currentPage === "home") {
-    const baseTaskTypes = TASK_TYPES[state.currentSubject] || [];
-    const customTaskTypes = state.taskTypes
-      .filter((type) => type.subject === state.currentSubject && type.status === "open")
-      .map((type) => type.name);
+    const availableTaskTypes = state.taskTypes.filter(
+      (type) => type.subject === state.currentSubject && type.status === "open"
+    );
 
-    const taskTypes = [...baseTaskTypes, ...customTaskTypes];
-    
+    const selectedTaskType =
+      availableTaskTypes.find((type) => type.id === state.selectedTaskTypeId) ||
+      availableTaskTypes[0] ||
+      null;
+
+    if (!state.selectedTaskTypeId && selectedTaskType) {
+      state.selectedTaskTypeId = selectedTaskType.id;
+    }
+
     const marketSolvers = MOCK_SOLVERS.filter(
       (solver) => solver.subject === state.currentSubject
     );
@@ -147,8 +153,8 @@ function renderCurrentPage() {
     const homeHtml = renderHome({
       subjects: SUBJECTS,
       currentSubject: state.currentSubject,
-      taskTypes,
-      currentTaskType: state.currentTaskType,
+      availableTaskTypes,
+      selectedTaskType,
       tagPool: TAG_POOL,
       selectedTags: state.selectedTags,
       draftInput: state.draftInput,
@@ -161,6 +167,41 @@ function renderCurrentPage() {
       ${homeHtml}
     `;
   }
+
+  if (state.currentPage === "dm") {
+    return renderDm({
+      dmRequests: state.dmRequests,
+      selectedClientName: state.selectedClientName,
+      reviews: state.reviews
+    });
+  }
+
+  if (state.currentPage === "profile") {
+    return renderProfile({
+      profile: state.profile,
+      reviews: state.reviews,
+      taskTypes: state.taskTypes,
+      profileEditor: state.profileEditor,
+      taskTypeEditor: state.taskTypeEditor
+    });
+  }
+
+  if (state.currentPage === "notifications") {
+    return renderNotifications({
+      notifications: state.notifications,
+      reviews: state.reviews
+    });
+  }
+
+  return `
+    <section class="panel">
+      <div class="empty-state">
+        <p class="empty-state__title">페이지를 찾을 수 없습니다</p>
+        <p class="empty-state__text">홈으로 돌아가 주세요.</p>
+      </div>
+    </section>
+  `;
+}
 
   if (state.currentPage === "dm") {
     return renderDm({
@@ -217,13 +258,29 @@ function handleCreateTask() {
     return;
   }
 
+  const selectedTaskType = state.taskTypes.find(
+    (type) => type.id === state.selectedTaskTypeId && type.status === "open"
+  );
+
+  if (!selectedTaskType) {
+    alert("먼저 열린 Type을 선택해 주세요.");
+    return;
+  }
+
+  const mergedTags = Array.from(
+    new Set([...(selectedTaskType.tags || []), ...state.selectedTags])
+  );
+
   const newTask = buildTask({
     subject: state.currentSubject,
-    taskType: state.currentTaskType,
-    tags: state.selectedTags,
+    taskType: selectedTaskType.name,
+    tags: mergedTags,
     userInput: text,
     clientPool: CLIENT_NAMES[state.currentSubject]
   });
+
+  newTask.taskTypeId = selectedTaskType.id;
+  newTask.taskTypeDescription = selectedTaskType.description || "";
 
   state.dmRequests = addDm(state.dmRequests, newTask);
   state.selectedDmId = newTask.id;
@@ -395,43 +452,6 @@ function handleClick(event) {
     return;
   }
 
-  if (action === "create-task-type") {
-    handleCreateTaskType();
-    renderApp();
-    return;
-  }
-
-  if (action === "toggle-task-type-status") {
-    const typeId = target.dataset.typeId;
-    handleToggleTaskTypeStatus(typeId);
-    renderApp();
-    return;
-  }
-
-  if (action === "delete-task-type") {
-    const typeId = target.dataset.typeId;
-    const confirmed = window.confirm("이 Type을 삭제하시겠습니까?");
-
-    if (!confirmed) return;
-
-    handleDeleteTaskType(typeId);
-    renderApp();
-    return;
-  }
-  
-  if (action === "edit-task-type") {
-    const typeId = target.dataset.typeId;
-    handleEditTaskType(typeId);
-    renderApp();
-    return;
-  }
-
-  if (action === "cancel-task-type-edit") {
-    resetTaskTypeEditor();
-    renderApp();
-    return;
-  }
-
   if (action === "sign-up") {
     handleSignUp().then(() => renderApp());
     return;
@@ -449,6 +469,12 @@ function handleClick(event) {
 
   if (action === "select-market-solver") {
     state.selectedMarketSolverId = target.dataset.solverId;
+    renderApp();
+    return;
+  }
+
+  if (action === "select-task-type-card") {
+    state.selectedTaskTypeId = target.dataset.typeId;
     renderApp();
     return;
   }
@@ -475,19 +501,17 @@ function handleClick(event) {
   if (action === "change-subject") {
     const nextSubject = target.dataset.subject;
     state.currentSubject = nextSubject;
-    state.currentTaskType = TASK_TYPES[nextSubject][0];
+
+    const nextAvailableTaskTypes = state.taskTypes.filter(
+      (type) => type.subject === nextSubject && type.status === "open"
+    );
+    state.selectedTaskTypeId = nextAvailableTaskTypes[0]?.id || null;
 
     const nextMarketSolvers = MOCK_SOLVERS.filter(
       (solver) => solver.subject === nextSubject
     );
     state.selectedMarketSolverId = nextMarketSolvers[0]?.id || null;
 
-    renderApp();
-    return;
-  }
-
-  if (action === "change-task-type") {
-    state.currentTaskType = target.dataset.taskType;
     renderApp();
     return;
   }
@@ -599,6 +623,43 @@ function handleClick(event) {
       renderApp();
     });
 
+    return;
+  }
+
+  if (action === "create-task-type") {
+    handleCreateTaskType();
+    renderApp();
+    return;
+  }
+
+  if (action === "edit-task-type") {
+    const typeId = target.dataset.typeId;
+    handleEditTaskType(typeId);
+    renderApp();
+    return;
+  }
+
+  if (action === "cancel-task-type-edit") {
+    resetTaskTypeEditor();
+    renderApp();
+    return;
+  }
+
+  if (action === "toggle-task-type-status") {
+    const typeId = target.dataset.typeId;
+    handleToggleTaskTypeStatus(typeId);
+    renderApp();
+    return;
+  }
+
+  if (action === "delete-task-type") {
+    const typeId = target.dataset.typeId;
+    const confirmed = window.confirm("이 Type을 삭제하시겠습니까?");
+
+    if (!confirmed) return;
+
+    handleDeleteTaskType(typeId);
+    renderApp();
     return;
   }
 }
