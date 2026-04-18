@@ -43,6 +43,7 @@ function renderDmDetail(selectedDm) {
   }
 
   const tagText = selectedDm.tags.map((tag) => `#${tag}`).join(" ");
+  const isCompleted = selectedDm.status === "completed";
 
   return `
     <div class="detail-card">
@@ -75,12 +76,13 @@ function renderDmDetail(selectedDm) {
           임시 저장
         </button>
         <button
-          class="btn btn--primary"
-          data-action="deliver-work"
-          data-dm-id="${selectedDm.id}"
-          type="button"
+         class="btn btn--primary"
+         data-action="deliver-work"
+         data-dm-id="${selectedDm.id}"
+         type="button"
+         ${isCompleted ? "disabled" : ""}
         >
-          작업물 전달
+         ${isCompleted ? "전달 완료됨" : "작업물 전달"}
         </button>
       </div>
     </div>
@@ -88,6 +90,9 @@ function renderDmDetail(selectedDm) {
 }
 
 export function renderDm({ dmRequests, selectedDmId, selectedDm }) {
+  const activeDmRequests = dmRequests.filter((dm) => dm.status !== "completed");
+  const completedDmRequests = dmRequests.filter((dm) => dm.status === "completed");
+
   return `
     <section class="panel">
       <div class="panel-header">
@@ -100,8 +105,19 @@ export function renderDm({ dmRequests, selectedDmId, selectedDm }) {
 
       <div class="dm-shell">
         <div class="list-block">
-          ${renderDmList(dmRequests, selectedDmId)}
+
+          <div class="field-group">
+            <label class="field-label">진행 중</label>
+            ${renderDmList(activeDmRequests, selectedDmId)}
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">완료됨</label>
+            ${renderDmList(completedDmRequests, selectedDmId)}
+          </div>
+
         </div>
+
         <div>
           ${renderDmDetail(selectedDm)}
         </div>
