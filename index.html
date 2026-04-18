@@ -1,0 +1,35 @@
+<body>
+  <div class="app">
+    <header class="topbar">
+      <h1>클라이언트 / 솔버</h1>
+      <p>공부를 의뢰처럼 처리하는 게임</p>
+    </header>
+
+    <main class="main-layout">
+      <section class="quest-panel">
+        <h2>오늘의 작업</h2>
+        <input type="text" id="questInput" placeholder="예: 수열 3문제 풀기" />
+        <button id="generateBtn">의뢰 받기</button>
+      </section>
+
+      <section class="request-panel">
+        <h2>현재 의뢰</h2>
+        <div id="requestCard">아직 도착한 의뢰가 없습니다.</div>
+        <button id="completeBtn" disabled>작업 완료</button>
+      </section>
+
+      <section class="review-panel">
+        <h2>후기</h2>
+        <div id="reviewCard">아직 후기가 없습니다.</div>
+      </section>
+
+      <section class="status-panel">
+        <h2>상태</h2>
+        <p>레벨: <span id="levelText">1</span></p>
+        <p>XP: <span id="xpText">0</span></p>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
