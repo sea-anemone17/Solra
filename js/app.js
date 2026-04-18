@@ -112,6 +112,10 @@ function handleDeliverWork(dmId) {
   const dm = state.dmRequests.find((item) => item.id === dmId);
 
   if (!dm) return;
+  if (dm.status === "completed") return;
+
+  const alreadyReviewed = state.reviews.some((review) => review.taskId === dmId);
+  if (alreadyReviewed) return;
 
   const workText = (dm.savedWork || "").trim();
 
@@ -126,6 +130,11 @@ function handleDeliverWork(dmId) {
   const review = makeReview(deliveredDm, REVIEW_TEMPLATES);
 
   state.reviews.unshift(review);
+  if (state.reviews.length > 10) {
+    state.reviews.pop();
+  }
+
+  state.profile.reviewCount += 1;
   state.profile.xp += 10;
   state.profile.completeCount += 1;
 
