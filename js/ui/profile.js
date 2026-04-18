@@ -1,18 +1,23 @@
 export function renderProfile({ profile, reviews, taskTypes, profileEditor }) {
-  const reviewCount = profile.reviewCount || reviews.length;
+  const safeReviews = Array.isArray(reviews) ? reviews : [];
+  const safeTaskTypes = Array.isArray(taskTypes) ? taskTypes : [];
+  const safeTags = Array.isArray(profile.tags) ? profile.tags : [];
+  const safeAchievements = Array.isArray(profile.achievements) ? profile.achievements : [];
 
-  const achievementsHtml = profile.achievements.length
-    ? profile.achievements
+  const reviewCount = profile.reviewCount || safeReviews.length;
+
+  const achievementsHtml = safeAchievements.length
+    ? safeAchievements
         .map((achievement) => `<span class="chip">#${achievement}</span>`)
         .join("")
     : `<span class="chip">#업적 없음</span>`;
 
-  const tagsHtml = profile.tags.length
-    ? profile.tags.map((tag) => `<span class="chip">#${tag}</span>`).join("")
+  const tagsHtml = safeTags.length
+    ? safeTags.map((tag) => `<span class="chip">#${tag}</span>`).join("")
     : `<span class="chip">#태그 없음</span>`;
 
-  const taskTypesHtml = taskTypes.length
-    ? taskTypes
+  const taskTypesHtml = safeTaskTypes.length
+    ? safeTaskTypes
         .map(
           (taskType) => `
             <div class="card">
@@ -30,7 +35,7 @@ export function renderProfile({ profile, reviews, taskTypes, profileEditor }) {
       </div>
     `;
 
-  const editorHtml = profileEditor.isOpen
+  const editorHtml = profileEditor?.isOpen
     ? `
       <section class="panel">
         <div class="panel-header">
@@ -87,25 +92,25 @@ export function renderProfile({ profile, reviews, taskTypes, profileEditor }) {
       <section class="panel">
         <div class="profile-card">
           <div class="profile-head">
-            <div class="avatar-circle">${profile.solverName.charAt(0).toUpperCase()}</div>
+            <div class="avatar-circle">${(profile.solverName || "S").charAt(0).toUpperCase()}</div>
             <div>
-              <h2 class="profile-name">${profile.solverName}</h2>
-              <p class="profile-bio">${profile.bio}</p>
+              <h2 class="profile-name">${profile.solverName || "Unnamed Solver"}</h2>
+              <p class="profile-bio">${profile.bio || "소개가 없습니다."}</p>
             </div>
           </div>
 
           <div class="profile-stats">
             <div class="stat-box">
               <span class="stat-box__label">레벨</span>
-              <strong class="stat-box__value">${profile.level}</strong>
+              <strong class="stat-box__value">${profile.level ?? 1}</strong>
             </div>
             <div class="stat-box">
               <span class="stat-box__label">XP</span>
-              <strong class="stat-box__value">${profile.xp}</strong>
+              <strong class="stat-box__value">${profile.xp ?? 0}</strong>
             </div>
             <div class="stat-box">
               <span class="stat-box__label">완료 수</span>
-              <strong class="stat-box__value">${profile.completeCount}</strong>
+              <strong class="stat-box__value">${profile.completeCount ?? 0}</strong>
             </div>
             <div class="stat-box">
               <span class="stat-box__label">총 후기 수</span>
