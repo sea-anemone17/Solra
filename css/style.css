@@ -780,3 +780,50 @@ img {
 .app-main {
   display: block;
 }
+
+.dm-thread {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.dm-thread-block {
+  display: grid;
+  gap: 10px;
+}
+
+.dm-message {
+  max-width: 85%;
+  padding: 12px 14px;
+  border-radius: 16px;
+  line-height: 1.6;
+  border: 1px solid var(--line);
+}
+
+.dm-message--client {
+  background: var(--surface-muted);
+  justify-self: start;
+}
+
+.dm-message--solver {
+  background: var(--accent-soft);
+  justify-self: end;
+  border-color: #c9e5cd;
+}
+
+.dm-message--system {
+  background: #f4f6f4;
+  justify-self: center;
+  color: var(--text-soft);
+}
+
+.dm-message__meta {
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  color: var(--accent-deep);
+}
+
+.dm-message__body {
+  font-size: 14px;
+}
