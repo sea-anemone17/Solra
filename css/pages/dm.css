@@ -187,3 +187,23 @@
     max-width: 88%;
   }
 }
+
+
+.dm-message {
+  animation: messagePop var(--motion-base) var(--ease-soft);
+}
+
+.dm-attachment-image {
+  transition:
+    border-color var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-soft),
+    box-shadow var(--motion-fast) var(--ease-standard);
+}
+
+.dm-attachment-image:hover {
+  transform: translateY(var(--lift-y));
+}
+
+.dm-shell .list-item:hover {
+  transform: none;
+}
