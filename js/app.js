@@ -227,6 +227,41 @@ function handleCreateTask() {
   pushNotification("새 Task 도착", NOTIFICATION_MESSAGES.taskCreated);
 }
 
+function createTaskTypeId() {
+  return `task-type-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+}
+
+function handleCreateTaskType() {
+  const subject = state.taskTypeEditor.subjectDraft;
+  const name = state.taskTypeEditor.nameDraft.trim();
+  const description = state.taskTypeEditor.descriptionDraft.trim();
+  const tags = state.taskTypeEditor.tagsDraft
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+
+  if (!name) {
+    alert("Type 이름을 입력해 주세요.");
+    return;
+  }
+
+  const newType = {
+    id: createTaskTypeId(),
+    subject,
+    name,
+    description,
+    tags,
+    status: "open"
+  };
+
+  state.taskTypes = [newType, ...state.taskTypes];
+
+  state.taskTypeEditor.subjectDraft = state.currentSubject;
+  state.taskTypeEditor.nameDraft = "";
+  state.taskTypeEditor.descriptionDraft = "";
+  state.taskTypeEditor.tagsDraft = "";
+}
+
 function handleSaveWork(dmId) {
   const dm = state.dmRequests.find((item) => item.id === dmId);
 
@@ -282,6 +317,12 @@ function handleClick(event) {
 
   if (action === "go-page") {
     state.currentPage = target.dataset.page;
+    renderApp();
+    return;
+  }
+
+  if (action === "create-task-type") {
+    handleCreateTaskType();
     renderApp();
     return;
   }
@@ -476,6 +517,26 @@ function handleInput(event) {
         savedWork: target.value
       };
     });
+    return;
+  }
+
+  if (target.dataset.action === "update-type-subject") {
+    state.taskTypeEditor.subjectDraft = target.value;
+    return;
+  }
+  
+  if (target.dataset.action === "update-type-name") {
+    state.taskTypeEditor.nameDraft = target.value;
+    return;
+  }
+
+  if (target.dataset.action === "update-type-description") {
+    state.taskTypeEditor.descriptionDraft = target.value;
+    return;
+  }
+
+  if (target.dataset.action === "update-type-tags") {
+    state.taskTypeEditor.tagsDraft = target.value;
     return;
   }
 
