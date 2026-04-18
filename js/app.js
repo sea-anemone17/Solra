@@ -65,8 +65,8 @@ function renderCurrentPage() {
   if (state.currentPage === "dm") {
     return renderDm({
       dmRequests: state.dmRequests,
-      selectedDmId: state.selectedDmId,
-      selectedDm
+      selectedClientName: state.selectedClientName,
+      reviews: state.reviews
     });
   }
 
@@ -124,6 +124,7 @@ function handleCreateTask() {
 
   state.dmRequests = addDm(state.dmRequests, newTask);
   state.selectedDmId = newTask.id;
+  state.selectedClientName = newTask.clientName;
   state.draftInput = "";
   state.currentPage = "dm";
 
@@ -224,6 +225,12 @@ function handleClick(event) {
 
   if (action === "select-dm") {
     state.selectedDmId = target.dataset.dmId;
+    renderApp();
+    return;
+  }
+
+  if (action === "select-client") {
+    state.selectedClientName = target.dataset.clientName;
     renderApp();
     return;
   }
