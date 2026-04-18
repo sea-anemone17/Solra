@@ -36,4 +36,11 @@ export const state = {
   taskTypes: [],
 
   selectedMarketSolverId: null
+
+  auth: {
+   user: null,
+   emailDraft: "",
+   passwordDraft: "",
+   statusMessage: ""
+  },
 };
