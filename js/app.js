@@ -3,7 +3,8 @@ import {
   subjectTabs,
   commissionTypesBySubject,
   requestTagPool,
-  clientsBySubject
+  clientsBySubject,
+  mockCreatorsBySubject
 } from "./data.js";
 import {
   renderProfile,
@@ -15,11 +16,14 @@ import {
   renderNotifications,
   renderAchievements,
   renderLatestReview,
-  setSideTab
+  setSideTab,
+  renderCreatorCards,
+  renderCreatorDetail
 } from "./ui.js";
 
 const generateBtn = document.getElementById("generateBtn");
 const resetBtn = document.getElementById("resetBtn");
+const refreshMarketBtn = document.getElementById("refreshMarketBtn");
 const workInput = document.getElementById("workInput");
 const saveWorkBtn = document.getElementById("saveWorkBtn");
 const submitWorkBtn = document.getElementById("submitWorkBtn");
@@ -43,11 +47,22 @@ const state = {
   selectedDmId: null,
   notifications: [],
   recentReviews: [],
-  sideMode: "dm"
+  sideMode: "dm",
+  visibleCreators: [],
+  selectedCreatorId: null
 };
 
 function pickRandom(array) {
   return array[Math.floor(Math.random() * array.length)];
+}
+
+function shuffle(array) {
+  const copied = [...array];
+  for (let i = copied.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copied[i], copied[j]] = [copied[j], copied[i]];
+  }
+  return copied;
 }
 
 function createId() {
@@ -78,6 +93,16 @@ function getSelectedDm() {
   return state.dmRequests.find((dm) => dm.id === state.selectedDmId) || null;
 }
 
+function getSelectedCreator() {
+  return state.visibleCreators.find((creator) => creator.id === state.selectedCreatorId) || null;
+}
+
+function refreshVisibleCreators() {
+  const pool = mockCreatorsBySubject[state.currentSubject] || [];
+  state.visibleCreators = shuffle(pool).slice(0, 4);
+  state.selectedCreatorId = state.visibleCreators[0]?.id || null;
+}
+
 function applyNewAchievements() {
   const newAchievements = getUnlockedAchievements(state);
 
@@ -104,6 +129,8 @@ function updateAllUI() {
   renderAchievements(state.unlockedAchievements);
   renderLatestReview(state.recentReviews[0] || "");
   setSideTab(state.sideMode);
+  renderCreatorCards(state.visibleCreators, state.selectedCreatorId);
+  renderCreatorDetail(getSelectedCreator());
 }
 
 generateBtn.addEventListener("click", () => {
@@ -154,6 +181,14 @@ resetBtn.addEventListener("click", () => {
   state.sideMode = "dm";
   questInput.value = "";
   workInput.value = "";
+
+  refreshVisibleCreators();
+  updateAllUI();
+});
+
+refreshMarketBtn.addEventListener("click", () => {
+  refreshVisibleCreators();
+  pushNotification("시장 갱신", `${state.currentSubject} 탭의 최근 끌올 목록이 새로고침되었습니다.`);
   updateAllUI();
 });
 
@@ -220,6 +255,7 @@ document.addEventListener("click", (event) => {
   if (subjectBtn) {
     state.currentSubject = subjectBtn.dataset.subject;
     state.currentCommissionType = commissionTypesBySubject[state.currentSubject][0];
+    refreshVisibleCreators();
     updateAllUI();
     return;
   }
@@ -249,6 +285,13 @@ document.addEventListener("click", (event) => {
   if (dmItem) {
     state.selectedDmId = dmItem.dataset.dmId;
     updateAllUI();
+    return;
+  }
+
+  const creatorItem = event.target.closest("[data-creator-id]");
+  if (creatorItem) {
+    state.selectedCreatorId = creatorItem.dataset.creatorId;
+    updateAllUI();
   }
 });
 
@@ -259,4 +302,5 @@ workInput.addEventListener("input", () => {
 });
 
 state.currentCommissionType = commissionTypesBySubject[state.currentSubject][0];
-updateAllUI();
+refreshVisibleCreators();
+updateAllUI();updateAllUI();
