@@ -32,13 +32,30 @@ export function renderStatus(state) {
 
 export function renderProfile(state) {
   document.getElementById("solverNameText").textContent = state.solverName;
-  document.getElementById("solverBioText").textContent = state.solverBio;
+  document.getElementById("solverBioText").textContent = state.solverBio || "소개가 아직 없습니다.";
   document.getElementById("avatarInitial").textContent = state.solverName.charAt(0).toUpperCase();
 
   const strongTagList = document.getElementById("strongTagList");
+
+  if (!state.strongTags.length) {
+    strongTagList.innerHTML = `<span class="tag-chip">#태그없음</span>`;
+    return;
+  }
+
   strongTagList.innerHTML = state.strongTags
     .map((tag) => `<span class="tag-chip">#${tag}</span>`)
     .join("");
+}
+
+export function fillProfileEditor(state) {
+  document.getElementById("solverNameInput").value = state.solverName;
+  document.getElementById("solverBioInput").value = state.solverBio;
+  document.getElementById("solverTagsInput").value = state.strongTags.join(", ");
+}
+
+export function setProfileEditorVisible(isVisible) {
+  const editor = document.getElementById("profileEditor");
+  editor.classList.toggle("hidden", !isVisible);
 }
 
 export function renderAchievements(unlockedAchievements) {
