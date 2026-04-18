@@ -169,7 +169,8 @@ function renderCurrentPage() {
       profile: state.profile,
       reviews: state.reviews,
       taskTypes: state.taskTypes,
-      profileEditor: state.profileEditor
+      profileEditor: state.profileEditor,
+      taskTypeEditor: state.taskTypeEditor
     });
   }
 
