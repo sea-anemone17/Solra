@@ -7,7 +7,8 @@ import {
   CLIENT_NAMES,
   REVIEW_TEMPLATES,
   NOTIFICATION_MESSAGES,
-  DEFAULT_TASK_TYPES
+  DEFAULT_TASK_TYPES,
+  MOCK_SOLVERS
 } from "./data.js";
 
 import { buildTask } from "./logic/task-builder.js";
@@ -48,6 +49,14 @@ function getReviewTemplatePool(subject) {
 function renderCurrentPage() {
   if (state.currentPage === "home") {
     const taskTypes = TASK_TYPES[state.currentSubject] || [];
+    const marketSolvers = MOCK_SOLVERS.filter(
+      (solver) => solver.subject === state.currentSubject
+    );
+
+    const selectedMarketSolver =
+      marketSolvers.find((solver) => solver.id === state.selectedMarketSolverId) ||
+      marketSolvers[0] ||
+      null;
 
     return renderHome({
       subjects: SUBJECTS,
@@ -56,7 +65,9 @@ function renderCurrentPage() {
       currentTaskType: state.currentTaskType,
       tagPool: TAG_POOL,
       selectedTags: state.selectedTags,
-      draftInput: state.draftInput
+      draftInput: state.draftInput,
+      marketSolvers,
+      selectedMarketSolver
     });
   }
 
@@ -189,10 +200,22 @@ function handleClick(event) {
     return;
   }
 
+  if (action === "select-market-solver") {
+    state.selectedMarketSolverId = target.dataset.solverId;
+    renderApp();
+    return;
+  }
+
   if (action === "change-subject") {
     const nextSubject = target.dataset.subject;
     state.currentSubject = nextSubject;
     state.currentTaskType = TASK_TYPES[nextSubject][0];
+
+    const nextMarketSolvers = MOCK_SOLVERS.filter(
+      (solver) => solver.subject === nextSubject
+    );
+    state.selectedMarketSolverId = nextMarketSolvers[0]?.id || null;
+
     renderApp();
     return;
   }
@@ -336,6 +359,13 @@ function init() {
 
   if (!state.currentTaskType) {
     state.currentTaskType = TASK_TYPES[state.currentSubject][0];
+  }
+
+  if (!state.selectedMarketSolverId) {
+    const initialMarketSolvers = MOCK_SOLVERS.filter(
+      (solver) => solver.subject === state.currentSubject
+    );
+    state.selectedMarketSolverId = initialMarketSolvers[0]?.id || null;
   }
 
   refreshProfileState();
