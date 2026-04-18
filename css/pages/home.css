@@ -247,3 +247,23 @@
     margin-top: 16px;
   }
 }
+
+.task-type-item:hover {
+  transform: translateY(var(--lift-y));
+}
+
+.task-type-item:active {
+  transform: scale(var(--press-scale));
+}
+
+.subject-tab:hover {
+  transform: translateY(var(--lift-y));
+}
+
+.subject-tab:active {
+  transform: scale(var(--press-scale));
+}
+
+.market-card:hover {
+  transform: translateY(-1px);
+}
