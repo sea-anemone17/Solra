@@ -92,6 +92,26 @@ function renderMessageBubble(type, title, body) {
   `;
 }
 
+function renderAttachmentPreview(attachments) {
+  if (!attachments || !attachments.length) return "";
+
+  return `
+    <div class="dm-attachments">
+      ${attachments
+        .map(
+          (file) => `
+            <img
+              class="dm-attachment-image"
+              src="${file.url}"
+              alt="${file.name || "첨부 이미지"}"
+            />
+          `
+        )
+        .join("")}
+    </div>
+  `;
+}
+
 function renderThread(tasks, reviews) {
   if (!tasks.length) {
     return `
@@ -132,9 +152,12 @@ function renderThread(tasks, reviews) {
           renderMessageBubble(
             "solver",
             "Solver",
-            task.deliveredWork
-              ? `작업물을 전달했습니다.<br><br>${task.deliveredWork}`
-              : "작업물을 전달했습니다."
+            `
+              ${task.deliveredWork
+                ? `작업물을 전달했습니다.<br><br>${task.deliveredWork}`
+                : "작업물을 전달했습니다."}
+              ${renderAttachmentPreview(task.attachments)}
+            `
           )
         );
 
@@ -175,6 +198,40 @@ function renderComposer(currentEditableTask) {
     `;
   }
 
+  const attachmentPreviewHtml =
+    currentEditableTask.attachments && currentEditableTask.attachments.length
+      ? `
+        <div class="dm-attachments">
+          ${currentEditableTask.attachments
+            .map(
+              (file) => `
+                <div class="dm-attachment-card">
+                  <img
+                    class="dm-attachment-image"
+                    src="${file.url}"
+                    alt="${file.name || "첨부 이미지"}"
+                  />
+                  <button
+                    class="btn btn--ghost"
+                    data-action="remove-attachment"
+                    data-dm-id="${currentEditableTask.id}"
+                    data-attachment-id="${file.id}"
+                    type="button"
+                  >
+                    삭제
+                  </button>
+                </div>
+              `
+            )
+            .join("")}
+        </div>
+      `
+      : `
+        <div class="empty-state">
+          <p class="empty-state__text">아직 첨부한 이미지가 없습니다.</p>
+        </div>
+      `;
+
   return `
     <div class="detail-card">
       <div class="field-group">
@@ -186,6 +243,23 @@ function renderComposer(currentEditableTask) {
           data-dm-id="${currentEditableTask.id}"
           placeholder="풀이 메모, 설명 정리, 인증 내용을 입력해 주세요."
         >${currentEditableTask.savedWork || ""}</textarea>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="work-image-input">작업물 이미지</label>
+        <input
+          id="work-image-input"
+          class="input"
+          data-action="upload-work-image"
+          data-dm-id="${currentEditableTask.id}"
+          type="file"
+          accept="image/*"
+        />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">첨부 미리보기</label>
+        ${attachmentPreviewHtml}
       </div>
 
       <div class="button-row">
