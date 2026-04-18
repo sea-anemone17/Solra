@@ -1,0 +1,73 @@
+/* =========================
+   PROFILE
+========================= */
+
+.profile-card {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.profile-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.avatar-circle {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, #f2faef 0%, #e8f6ec 100%);
+  border: 1px solid #cfe5d5;
+  color: var(--accent-deep);
+  font-size: 1.45rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.profile-name {
+  margin: 0 0 4px;
+  font-size: 1.35rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.profile-bio {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.92rem;
+}
+
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.stat-box {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+
+.stat-box__label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-soft);
+  font-size: 0.82rem;
+}
+
+.stat-box__value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+@media (max-width: 700px) {
+  .profile-stats {
+    grid-template-columns: 1fr;
+  }
+}
