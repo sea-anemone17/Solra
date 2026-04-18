@@ -233,7 +233,7 @@ function renderComposer(currentEditableTask) {
       `;
 
   return `
-    <div class="detail-card">
+    <div class="detail-card dm-composer">
       <div class="field-group">
         <label class="field-label" for="work-input">작업물</label>
         <textarea
@@ -245,7 +245,7 @@ function renderComposer(currentEditableTask) {
         >${currentEditableTask.savedWork || ""}</textarea>
       </div>
 
-      <div class="field-group">
+      <div class="field-group dm-upload-row">
         <label class="field-label" for="work-image-input">작업물 이미지</label>
         <input
           id="work-image-input"
