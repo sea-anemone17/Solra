@@ -1,3 +1,95 @@
+function renderMarketCards(marketSolvers, selectedMarketSolver) {
+  if (!marketSolvers.length) {
+    return `
+      <div class="empty-state">
+        <p class="empty-state__title">해당 과목의 Solver가 없습니다</p>
+        <p class="empty-state__text">다른 과목 탭을 눌러 보세요.</p>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="list-block">
+      ${marketSolvers
+        .map(
+          (solver) => `
+            <button
+              class="card market-card ${selectedMarketSolver?.id === solver.id ? "is-selected" : ""}"
+              data-action="select-market-solver"
+              data-solver-id="${solver.id}"
+              type="button"
+            >
+              <strong>${solver.name}</strong>
+              <p class="muted">${solver.achievementLine}</p>
+              <p class="muted">${solver.bio}</p>
+              <div class="chip-list">
+                ${solver.tags.map((tag) => `<span class="chip">#${tag}</span>`).join("")}
+              </div>
+              <p class="muted">후기 ${solver.reviewCount}개</p>
+            </button>
+          `
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function renderMarketDetail(selectedMarketSolver) {
+  if (!selectedMarketSolver) {
+    return `
+      <div class="empty-state">
+        <p class="empty-state__title">선택된 Solver가 없습니다</p>
+        <p class="empty-state__text">왼쪽 카드에서 Solver를 선택해 주세요.</p>
+      </div>
+    `;
+  }
+
+  const taskTypeHtml = selectedMarketSolver.taskTypes
+    .map(
+      (taskType) => `
+        <div class="card">
+          <strong>${taskType.name}</strong>
+          <p class="muted">${taskType.description}</p>
+        </div>
+      `
+    )
+    .join("");
+
+  const reviewHtml = selectedMarketSolver.sampleReviews
+    .map((review) => `<div class="card"><p class="muted">${review}</p></div>`)
+    .join("");
+
+  return `
+    <div class="detail-card">
+      <div class="card">
+        <strong>${selectedMarketSolver.name}</strong>
+        <p class="muted">${selectedMarketSolver.achievementLine}</p>
+        <p class="muted">${selectedMarketSolver.bio}</p>
+
+        <div class="chip-list">
+          ${selectedMarketSolver.tags.map((tag) => `<span class="chip">#${tag}</span>`).join("")}
+        </div>
+
+        <p class="muted">총 후기 수 ${selectedMarketSolver.reviewCount}</p>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">열린 Task Type</label>
+        <div class="list-block">
+          ${taskTypeHtml}
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">샘플 후기</label>
+        <div class="list-block">
+          ${reviewHtml}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 export function renderHome({
   subjects,
   currentSubject,
@@ -5,7 +97,9 @@ export function renderHome({
   currentTaskType,
   tagPool,
   selectedTags,
-  draftInput
+  draftInput,
+  marketSolvers,
+  selectedMarketSolver
 }) {
   const subjectTabsHtml = subjects
     .map(
@@ -101,6 +195,26 @@ export function renderHome({
         >
           Task 생성
         </button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-header__text">
+          <p class="section-eyebrow">SOLVER MARKET</p>
+          <h2 class="panel-title">${currentSubject} Solver들</h2>
+          <p class="panel-subtitle">현재 과목에서 활동 중인 Solver들을 둘러보세요.</p>
+        </div>
+      </div>
+
+      <div class="dm-shell">
+        <div class="list-block">
+          ${renderMarketCards(marketSolvers, selectedMarketSolver)}
+        </div>
+
+        <div>
+          ${renderMarketDetail(selectedMarketSolver)}
+        </div>
       </div>
     </section>
   `;
