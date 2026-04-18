@@ -34,6 +34,10 @@ function pushNotification(title, body) {
   }
 }
 
+function createAttachmentId() {
+  return `attachment-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+}
+
 function refreshProfileState() {
   state.profile.level = Math.floor(state.profile.xp / 30) + 1;
   state.profile.achievements = getAchievements(state.profile.completeCount);
@@ -206,6 +210,25 @@ function handleClick(event) {
     return;
   }
 
+  if (action === "remove-attachment") {
+    const dmId = target.dataset.dmId;
+    const attachmentId = target.dataset.attachmentId;
+
+    state.dmRequests = state.dmRequests.map((dm) => {
+      if (dm.id !== dmId) return dm;
+
+      return {
+        ...dm,
+        attachments: (dm.attachments || []).filter(
+          (file) => file.id !== attachmentId
+        )
+      };
+    });
+
+    renderApp();
+    return;
+  }
+
   if (action === "change-subject") {
     const nextSubject = target.dataset.subject;
     state.currentSubject = nextSubject;
@@ -344,6 +367,38 @@ function handleInput(event) {
   if (target.dataset.action === "update-profile-tags") {
     state.profileEditor.tagsDraft = target.value;
     return;
+  }
+
+  if (target.dataset.action === "upload-work-image") {
+    const dmId = target.dataset.dmId;
+    const file = target.files?.[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      state.dmRequests = state.dmRequests.map((dm) => {
+        if (dm.id !== dmId) return dm;
+
+        const nextAttachments = Array.isArray(dm.attachments) ? [...dm.attachments] : [];
+
+        nextAttachments.push({
+          id: createAttachmentId(),
+          name: file.name,
+          url: reader.result
+        });
+
+        return {
+          ...dm,
+          attachments: nextAttachments
+        };
+      });
+
+      renderApp();
+    };
+
+    reader.readAsDataURL(file);
   }
 }
 
