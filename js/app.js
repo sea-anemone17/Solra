@@ -422,8 +422,36 @@ function handleClick(event) {
     state.profile.bio = bio || "소개가 없습니다.";
     state.profile.tags = tags;
 
-    state.profileEditor.isOpen = false;
-    renderApp();
+    if (!state.auth.user) {
+      state.auth.statusMessage = "로그인 후 프로필을 저장할 수 있습니다.";
+      state.profileEditor.isOpen = false;
+      renderApp();
+      return;
+    }
+
+    saveProfile(state.auth.user.id, state.profile).then(({ data, error }) => {
+      if (error) {
+        state.auth.statusMessage = `프로필 저장 실패: ${error.message}`;
+        renderApp();
+        return;
+      }
+
+      if (data) {
+        state.profile.solverName = data.solver_name ?? state.profile.solverName;
+        state.profile.bio = data.bio ?? state.profile.bio;
+        state.profile.tags = data.tags ?? state.profile.tags;
+        state.profile.avatarUrl = data.avatar_path ?? state.profile.avatarUrl;
+        state.profile.level = data.level ?? state.profile.level;
+        state.profile.xp = data.xp ?? state.profile.xp;
+        state.profile.completeCount = data.complete_count ?? state.profile.completeCount;
+        state.profile.reviewCount = data.review_count ?? state.profile.reviewCount;
+      }
+
+      state.profileEditor.isOpen = false;
+      state.auth.statusMessage = "프로필이 저장되었습니다.";
+      renderApp();
+    });
+
     return;
   }
 }
@@ -531,6 +559,9 @@ async function init() {
     state.selectedMarketSolverId = initialMarketSolvers[0]?.id || null;
   }
 
+  refreshProfileState();
+  renderApp();
+
   await refreshAuthUser();
 
   if (state.auth.user) {
@@ -542,6 +573,7 @@ async function init() {
       state.profile.solverName = profileData.solver_name ?? state.profile.solverName;
       state.profile.bio = profileData.bio ?? state.profile.bio;
       state.profile.tags = profileData.tags ?? state.profile.tags;
+      state.profile.avatarUrl = profileData.avatar_path ?? state.profile.avatarUrl;
       state.profile.level = profileData.level ?? state.profile.level;
       state.profile.xp = profileData.xp ?? state.profile.xp;
       state.profile.completeCount = profileData.complete_count ?? state.profile.completeCount;
