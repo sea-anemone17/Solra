@@ -35,7 +35,7 @@ export const state = {
 
   taskTypes: [],
 
-  selectedMarketSolverId: null
+  selectedMarketSolverId: null,
 
   auth: {
    user: null,
