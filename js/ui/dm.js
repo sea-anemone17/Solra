@@ -29,7 +29,7 @@ function groupByClient(dmRequests) {
       const sortedTasks = sortByLatestDesc(tasks);
       const latestTask = sortedTasks[0];
 
-      let latestPreview = "신청 메시지";
+      let latestPreview = latestTask.requestText || "신청 메시지";
       if (latestTask.status === "completed") {
         latestPreview = "작업 완료";
       } else if (latestTask.savedWork) {
@@ -51,6 +51,11 @@ function groupByClient(dmRequests) {
     });
 }
 
+function truncateText(text, maxLength = 34) {
+  if (!text) return "";
+  return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+}
+
 function renderClientList(clientThreads, selectedClientName) {
   if (!clientThreads.length) {
     return `
@@ -62,22 +67,20 @@ function renderClientList(clientThreads, selectedClientName) {
   }
 
   const itemsHtml = clientThreads
-    .map(
-      (thread) => `
-        <li
-          class="list-item ${thread.clientName === selectedClientName ? "is-selected" : ""}"
-          data-action="select-client"
-          data-client-name="${thread.clientName}"
-        >
-          <div class="list-item__title">
-            <strong>${thread.clientName}</strong>
-            <span class="status-badge">${thread.latestTask.status}</span>
-          </div>
-          <p>${thread.latestTask.subject} · ${thread.latestTask.taskTypeName || thread.latestTask.taskType}</p>
-          <p>${thread.latestPreview}</p>
-        </li>
-      `
-    )
+    .map((thread) => `
+      <li
+        class="list-item ${thread.clientName === selectedClientName ? "is-selected" : ""}"
+        data-action="select-client"
+        data-client-name="${thread.clientName}"
+      >
+        <div class="list-item__title">
+          <strong>${thread.clientName}</strong>
+          <span class="status-badge">${thread.latestTask.status}</span>
+        </div>
+        <p>${thread.latestTask.subject} · ${thread.latestTask.taskTypeName || thread.latestTask.taskType}</p>
+        <p>${truncateText(thread.latestPreview)}</p>
+      </li>
+    `)
     .join("");
 
   return `<ul class="list">${itemsHtml}</ul>`;
@@ -137,25 +140,17 @@ function renderThread(tasks, reviews) {
         )
       );
 
-      if (task.savedWork && task.status !== "completed") {
-        blocks.push(
-          renderMessageBubble(
-            "system",
-            "System",
-            "작업물이 임시 저장되었습니다."
-          )
-        );
-      }
-
       if (task.status === "completed") {
         blocks.push(
           renderMessageBubble(
             "solver",
             "Solver",
             `
-              ${task.deliveredWork
-                ? `작업물을 전달했습니다.<br><br>${task.deliveredWork}`
-                : "작업물을 전달했습니다."}
+              ${
+                task.deliveredWork
+                  ? `작업물을 전달했습니다.<br><br>${task.deliveredWork}`
+                  : "작업물을 전달했습니다."
+              }
               ${renderAttachmentPreview(task.attachments)}
             `
           )
@@ -226,16 +221,12 @@ function renderComposer(currentEditableTask) {
             .join("")}
         </div>
       `
-      : `
-        <div class="empty-state">
-          <p class="empty-state__text">아직 첨부한 이미지가 없습니다.</p>
-        </div>
-      `;
+      : "";
 
   return `
-    <div class="detail-card dm-composer">
+    <section class="dm-composer">
       <div class="field-group">
-        <label class="field-label" for="work-input">작업물</label>
+        <label class="field-label" for="work-input">작업물 작성</label>
         <textarea
           id="work-input"
           class="textarea"
@@ -257,10 +248,16 @@ function renderComposer(currentEditableTask) {
         />
       </div>
 
-      <div class="field-group">
-        <label class="field-label">첨부 미리보기</label>
-        ${attachmentPreviewHtml}
-      </div>
+      ${
+        attachmentPreviewHtml
+          ? `
+            <div class="field-group">
+              <label class="field-label">첨부 미리보기</label>
+              ${attachmentPreviewHtml}
+            </div>
+          `
+          : ""
+      }
 
       <div class="button-row">
         <button
@@ -280,7 +277,7 @@ function renderComposer(currentEditableTask) {
           작업물 전달
         </button>
       </div>
-    </div>
+    </section>
   `;
 }
 
