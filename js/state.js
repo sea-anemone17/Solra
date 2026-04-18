@@ -35,6 +35,13 @@ export const state = {
 
   taskTypes: [],
 
+  taskTypeEditor: {
+    subjectDraft: "수학",
+    nameDraft: "",
+    descriptionDraft: "",
+    tagsDraft: ""
+  },
+
   selectedMarketSolverId: null,
 
   auth: {
