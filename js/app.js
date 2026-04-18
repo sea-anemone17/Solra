@@ -221,6 +221,11 @@ function init() {
   app.addEventListener("click", handleClick);
   app.addEventListener("input", handleInput);
 
+  if (state.taskTypes.length === 0) {
+    state.taskTypes = [...DEFAULT_TASK_TYPES];
+    state.currentTaskTypeId = state.taskTypes[0]?.id || null;
+  }
+
   refreshProfileState();
   renderApp();
 }
