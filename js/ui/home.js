@@ -1,3 +1,59 @@
+function renderTaskTypeCards(availableTaskTypes, selectedTaskType) {
+  if (!availableTaskTypes.length) {
+    return `
+      <div class="empty-state">
+        <p class="empty-state__title">열린 Type이 없습니다</p>
+        <p class="empty-state__text">프로필 페이지에서 이 과목의 Type을 먼저 열어 주세요.</p>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="list-block">
+      ${availableTaskTypes
+        .map(
+          (type) => `
+            <button
+              class="market-card ${selectedTaskType?.id === type.id ? "is-selected" : ""}"
+              data-action="select-task-type-card"
+              data-type-id="${type.id}"
+              type="button"
+            >
+              <strong>${type.name}</strong>
+              <p class="muted">${type.description || "설명이 없습니다."}</p>
+              <div class="chip-list">
+                ${(type.tags || []).map((tag) => `<span class="chip">#${tag}</span>`).join("")}
+              </div>
+            </button>
+          `
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function renderSelectedTaskTypeDetail(selectedTaskType) {
+  if (!selectedTaskType) {
+    return `
+      <div class="empty-state">
+        <p class="empty-state__title">선택된 Type이 없습니다</p>
+        <p class="empty-state__text">왼쪽에서 Task 페이지를 선택해 주세요.</p>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="card">
+      <strong>${selectedTaskType.name}</strong>
+      <p class="muted">${selectedTaskType.description || "설명이 없습니다."}</p>
+
+      <div class="chip-list">
+        ${(selectedTaskType.tags || []).map((tag) => `<span class="chip">#${tag}</span>`).join("")}
+      </div>
+    </div>
+  `;
+}
+
 function renderMarketCards(marketSolvers, selectedMarketSolver) {
   if (!marketSolvers.length) {
     return `
@@ -14,7 +70,7 @@ function renderMarketCards(marketSolvers, selectedMarketSolver) {
         .map(
           (solver) => `
             <button
-              class="card market-card ${selectedMarketSolver?.id === solver.id ? "is-selected" : ""}"
+              class="market-card ${selectedMarketSolver?.id === solver.id ? "is-selected" : ""}"
               data-action="select-market-solver"
               data-solver-id="${solver.id}"
               type="button"
@@ -93,8 +149,8 @@ function renderMarketDetail(selectedMarketSolver) {
 export function renderHome({
   subjects,
   currentSubject,
-  taskTypes,
-  currentTaskType,
+  availableTaskTypes,
+  selectedTaskType,
   tagPool,
   selectedTags,
   draftInput,
@@ -111,21 +167,6 @@ export function renderHome({
           type="button"
         >
           ${subject}
-        </button>
-      `
-    )
-    .join("");
-
-  const taskTypesHtml = taskTypes
-    .map(
-      (taskType) => `
-        <button
-          class="chip ${taskType === currentTaskType ? "is-active" : ""}"
-          data-action="change-task-type"
-          data-task-type="${taskType}"
-          type="button"
-        >
-          ${taskType}
         </button>
       `
     )
@@ -152,7 +193,7 @@ export function renderHome({
         <div class="panel-header__text">
           <p class="section-eyebrow">TASK BUILDER</p>
           <h2 class="panel-title">Task 만들기</h2>
-          <p class="panel-subtitle">실제로 해야 할 공부를 입력하면 Client Task로 변환됩니다.</p>
+          <p class="panel-subtitle">열린 Task 페이지를 고르고 요청을 생성하세요.</p>
         </div>
       </div>
 
@@ -164,14 +205,17 @@ export function renderHome({
       </div>
 
       <div class="field-group">
-        <label class="field-label">Task Type</label>
-        <div class="chip-list">
-          ${taskTypesHtml}
-        </div>
+        <label class="field-label">열린 Task 페이지</label>
+        ${renderTaskTypeCards(availableTaskTypes, selectedTaskType)}
       </div>
 
       <div class="field-group">
-        <label class="field-label">태그</label>
+        <label class="field-label">선택한 Type 상세</label>
+        ${renderSelectedTaskTypeDetail(selectedTaskType)}
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">요청 태그</label>
         <div class="chip-list">
           ${tagsHtml}
         </div>
@@ -183,7 +227,7 @@ export function renderHome({
           id="task-input"
           class="textarea"
           data-action="update-draft"
-          placeholder="예: 수열 3문제 풀기 / 영단어 20개 외우기 / 개념 비교 정리"
+          placeholder="예: 15번 킬러문항 풀이 흐름 정리해 보기 / 오답 노트 구조 다시 잡기"
         >${draftInput || ""}</textarea>
       </div>
 
