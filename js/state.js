@@ -24,15 +24,13 @@ export const state = {
     achievements: []
   },
 
-  taskTypes: [
-    // 기본 예시
-    // {
-    //   id: "math-problem-1",
-    //   subject: "수학",
-    //   name: "문제 풀이형",
-    //   description: "문제 풀이 과정을 단계별로 정리합니다.",
-    //   tags: ["고2", "내신", "오답정리"],
-    //   status: "open"
-    // }
-  ]
+  profileEditor: {
+    isOpen: false,
+    nameDraft: "",
+    bioDraft: "",
+    tagsDraft: ""
+  },
+
+  taskTypes: []
+};  ]
 };
