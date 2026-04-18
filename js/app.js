@@ -15,8 +15,10 @@ import { buildTask } from "./logic/task-builder.js";
 import { addDm, saveWork, deliverWork } from "./logic/dm-actions.js";
 import { makeReview } from "./logic/reviews.js";
 import { getAchievements } from "./logic/achievements.js";
-import { getCurrentUser } from "./auth.js";
 import { loadProfile } from "./sync.js";
+
+import { signUp, signIn, signOut, getCurrentUser } from "./auth.js";
+import { renderAuthPanel } from "./ui/auth-panel.js";
 
 import { renderLayout } from "./ui/layout.js";
 import { renderHome } from "./ui/home.js";
@@ -34,6 +36,74 @@ function pushNotification(title, body) {
   if (state.notifications.length > 8) {
     state.notifications.pop();
   }
+}
+
+async function refreshAuthUser() {
+  const { user, error } = await getCurrentUser();
+
+  if (error) {
+    state.auth.user = null;
+    state.auth.statusMessage = "사용자 확인 중 오류가 발생했습니다.";
+    return;
+  }
+
+  state.auth.user = user ?? null;
+
+  if (user?.email) {
+    state.auth.statusMessage = "계정 연결 완료";
+  }
+}
+
+async function handleSignUp() {
+  const email = state.auth.emailDraft.trim();
+  const password = state.auth.passwordDraft.trim();
+
+  if (!email || !password) {
+    state.auth.statusMessage = "이메일과 비밀번호를 입력해 주세요.";
+    return;
+  }
+
+  const { error } = await signUp(email, password, state.profile.solverName);
+
+  if (error) {
+    state.auth.statusMessage = `회원가입 실패: ${error.message}`;
+    return;
+  }
+
+  state.auth.statusMessage = "회원가입 요청이 완료되었습니다. 이메일 인증이 필요한 설정일 수도 있습니다.";
+  await refreshAuthUser();
+}
+
+async function handleSignIn() {
+  const email = state.auth.emailDraft.trim();
+  const password = state.auth.passwordDraft.trim();
+
+  if (!email || !password) {
+    state.auth.statusMessage = "이메일과 비밀번호를 입력해 주세요.";
+    return;
+  }
+
+  const { error } = await signIn(email, password);
+
+  if (error) {
+    state.auth.statusMessage = `로그인 실패: ${error.message}`;
+    return;
+  }
+
+  state.auth.statusMessage = "로그인되었습니다.";
+  await refreshAuthUser();
+}
+
+async function handleSignOut() {
+  const { error } = await signOut();
+
+  if (error) {
+    state.auth.statusMessage = `로그아웃 실패: ${error.message}`;
+    return;
+  }
+
+  state.auth.user = null;
+  state.auth.statusMessage = "로그아웃되었습니다.";
 }
 
 function createAttachmentId() {
@@ -64,7 +134,11 @@ function renderCurrentPage() {
       marketSolvers[0] ||
       null;
 
-    return renderHome({
+    const authHtml = renderAuthPanel({
+      auth: state.auth
+    });
+
+    const homeHtml = renderHome({
       subjects: SUBJECTS,
       currentSubject: state.currentSubject,
       taskTypes,
@@ -75,6 +149,11 @@ function renderCurrentPage() {
       marketSolvers,
       selectedMarketSolver
     });
+
+    return `
+      ${authHtml}
+      ${homeHtml}
+    `;
   }
 
   if (state.currentPage === "dm") {
@@ -203,6 +282,21 @@ function handleClick(event) {
   if (action === "go-page") {
     state.currentPage = target.dataset.page;
     renderApp();
+    return;
+  }
+
+  if (action === "sign-up") {
+    handleSignUp().then(() => renderApp());
+    return;
+  }
+
+  if (action === "sign-in") {
+    handleSignIn().then(() => renderApp());
+    return;
+  }
+
+  if (action === "sign-out") {
+    handleSignOut().then(() => renderApp());
     return;
   }
 
@@ -371,6 +465,16 @@ function handleInput(event) {
     return;
   }
 
+  if (target.dataset.action === "update-auth-email") {
+    state.auth.emailDraft = target.value;
+    return;
+  }
+
+  if (target.dataset.action === "update-auth-password") {
+    state.auth.passwordDraft = target.value;
+    return;
+  }
+
   if (target.dataset.action === "upload-work-image") {
     const dmId = target.dataset.dmId;
     const file = target.files?.[0];
@@ -397,10 +501,12 @@ function handleInput(event) {
         };
       });
 
+      target.value = "";
       renderApp();
     };
 
     reader.readAsDataURL(file);
+    return;
   }
 }
 
@@ -425,29 +531,22 @@ async function init() {
     state.selectedMarketSolverId = initialMarketSolvers[0]?.id || null;
   }
 
-  const { user, error } = await getCurrentUser();
+  await refreshAuthUser();
 
-  if (error) {
-    console.error("사용자 확인 실패:", error);
-  }
-
-  if (user) {
-    const { data: profileData, error: profileError } = await loadProfile(user.id);
+  if (state.auth.user) {
+    const { data: profileData, error: profileError } = await loadProfile(state.auth.user.id);
 
     if (profileError) {
-      console.error("프로필 로드 실패:", profileError);
+      state.auth.statusMessage = `프로필 로드 실패: ${profileError.message}`;
     } else if (profileData) {
       state.profile.solverName = profileData.solver_name ?? state.profile.solverName;
       state.profile.bio = profileData.bio ?? state.profile.bio;
       state.profile.tags = profileData.tags ?? state.profile.tags;
-      state.profile.avatarUrl = profileData.avatar_path ?? "";
       state.profile.level = profileData.level ?? state.profile.level;
       state.profile.xp = profileData.xp ?? state.profile.xp;
       state.profile.completeCount = profileData.complete_count ?? state.profile.completeCount;
       state.profile.reviewCount = profileData.review_count ?? state.profile.reviewCount;
     }
-  } else {
-    console.log("로그인된 사용자가 없습니다.");
   }
 
   refreshProfileState();
