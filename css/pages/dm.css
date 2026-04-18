@@ -4,37 +4,55 @@
 
 .dm-shell {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
-  gap: 16px;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 18px;
   align-items: start;
 }
 
-.message-card {
+/* 왼쪽 목록은 더 조용하게 */
+.dm-shell .list-block {
+  gap: 8px;
+}
+
+.dm-shell .list-item {
+  padding: 12px 13px;
+  border-radius: 12px;
   background: #ffffff;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 14px;
-  line-height: 1.7;
-  white-space: pre-line;
+  border: 1px solid #e5e7eb;
+  box-shadow: none;
 }
 
-.message-meta {
-  display: inline-flex;
-  align-items: center;
-  min-height: 24px;
-  padding: 0 8px;
-  border-radius: 999px;
-  background: #f3f4f6;
-  color: var(--text-soft);
-  font-size: 0.72rem;
-  font-weight: 800;
-  margin-bottom: 10px;
+.dm-shell .list-item:hover {
+  transform: none;
+  border-color: #d7dde3;
+  background: #fbfcfd;
 }
 
+.dm-shell .list-item.is-selected {
+  background: #f3faf4;
+  border-color: #d5e8d9;
+}
+
+.dm-shell .list-item__title {
+  margin-bottom: 6px;
+}
+
+.dm-shell .list-item p {
+  font-size: 0.83rem;
+  line-height: 1.45;
+}
+
+/* 오른쪽 본문 전체 */
+.detail-card {
+  display: grid;
+  gap: 16px;
+}
+
+/* 스레드 영역 */
 .dm-thread {
   display: grid;
-  gap: 14px;
-  padding: 4px 2px;
+  gap: 16px;
+  padding: 4px 0;
 }
 
 .dm-thread-block {
@@ -42,45 +60,52 @@
   gap: 8px;
 }
 
+/* 메시지 공통 */
 .dm-message {
-  max-width: 78%;
+  max-width: 76%;
   padding: 12px 14px;
-  border-radius: 18px;
-  line-height: 1.6;
-  font-size: 0.92rem;
-  border: 1px solid var(--line);
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  line-height: 1.68;
+  font-size: 0.93rem;
+  word-break: break-word;
+  box-shadow: none;
 }
 
+/* 클라이언트 */
 .dm-message--client {
   justify-self: start;
   background: #ffffff;
-  border-color: var(--line);
   border-top-left-radius: 8px;
 }
 
+/* 솔버 */
 .dm-message--solver {
   justify-self: end;
-  background: #ecf9ef;
-  border-color: #cfe8d5;
+  background: #eef9f0;
+  border-color: #d3e8d8;
   border-top-right-radius: 8px;
 }
 
+/* 시스템 */
 .dm-message--system {
   justify-self: center;
   max-width: 100%;
   background: #f8fafc;
+  border-color: #e7eaee;
   color: var(--text-soft);
-  border-color: #e5e7eb;
-  border-radius: 14px;
+  border-radius: 12px;
   font-size: 0.84rem;
   padding: 9px 12px;
 }
 
+/* 메타 */
 .dm-message__meta {
-  font-size: 11px;
+  font-size: 0.74rem;
   font-weight: 800;
   margin-bottom: 6px;
-  color: var(--text-faint);
+  color: var(--text-soft);
+  letter-spacing: 0.01em;
 }
 
 .dm-message--solver .dm-message__meta {
@@ -89,9 +114,9 @@
 
 .dm-message__body {
   color: var(--text);
-  word-break: break-word;
 }
 
+/* 첨부 */
 .dm-attachments {
   display: flex;
   flex-wrap: wrap;
@@ -102,36 +127,43 @@
 .dm-attachment-card {
   display: grid;
   gap: 6px;
-  width: 150px;
+  width: 140px;
 }
 
 .dm-attachment-image {
-  width: 150px;
-  height: 150px;
-  border-radius: 14px;
-  border: 1px solid var(--line);
+  width: 140px;
+  height: 140px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
   object-fit: cover;
   background: #ffffff;
   transition:
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast);
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .dm-attachment-image:hover {
   transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+  border-color: #d3dae3;
+  box-shadow: none;
 }
 
+/* 작성 영역 */
 .dm-composer {
-  border-top: 1px solid var(--line);
-  padding-top: 14px;
-  margin-top: 6px;
   display: grid;
   gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid #e8ebef;
+}
+
+.dm-composer .field-label {
+  font-size: 0.88rem;
+  color: var(--text-soft);
 }
 
 .dm-composer .textarea {
-  min-height: 110px;
+  min-height: 120px;
+  line-height: 1.68;
 }
 
 .dm-upload-row {
@@ -145,6 +177,7 @@
   padding: 10px 12px;
 }
 
+/* 모바일 */
 @media (max-width: 900px) {
   .dm-shell {
     grid-template-columns: 1fr;
