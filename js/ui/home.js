@@ -9,21 +9,17 @@ function renderTaskTypeCards(availableTaskTypes, selectedTaskType) {
   }
 
   return `
-    <div class="list-block">
+    <div class="task-type-list">
       ${availableTaskTypes
         .map(
           (type) => `
             <button
-              class="market-card ${selectedTaskType?.id === type.id ? "is-selected" : ""}"
+              class="task-type-item ${selectedTaskType?.id === type.id ? "is-selected" : ""}"
               data-action="select-task-type-card"
               data-type-id="${type.id}"
               type="button"
             >
-              <strong>${type.name}</strong>
-              <p class="muted">${type.description || "설명이 없습니다."}</p>
-              <div class="chip-list">
-                ${(type.tags || []).map((tag) => `<span class="chip">#${tag}</span>`).join("")}
-              </div>
+              <span class="task-type-item__name">${type.name}</span>
             </button>
           `
         )
@@ -37,14 +33,14 @@ function renderSelectedTaskTypeDetail(selectedTaskType) {
     return `
       <div class="empty-state">
         <p class="empty-state__title">선택된 Type이 없습니다</p>
-        <p class="empty-state__text">왼쪽에서 Task 페이지를 선택해 주세요.</p>
+        <p class="empty-state__text">위에서 Task 페이지를 선택해 주세요.</p>
       </div>
     `;
   }
 
   return `
-    <div class="card">
-      <strong>${selectedTaskType.name}</strong>
+    <div class="card task-type-detail">
+      <strong class="task-type-detail__title">${selectedTaskType.name}</strong>
       <p class="muted">${selectedTaskType.description || "설명이 없습니다."}</p>
 
       <div class="chip-list">
