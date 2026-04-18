@@ -1,61 +1,154 @@
-export function renderRequest(request) {
-  const requestCard = document.getElementById("requestCard");
+export function renderProfile(state) {
+  document.getElementById("solverNameText").textContent = state.solverName;
+  document.getElementById("solverBioText").textContent = state.solverBio;
+  document.getElementById("avatarInitial").textContent = state.solverName.charAt(0).toUpperCase();
 
-  requestCard.className = "message-card request";
-  requestCard.innerHTML = `
-    <span class="message-header">Client · ${request.clientName}</span>
-    <div>${request.message.replaceAll("\n", "<br>")}</div>
-  `;
-}
-
-export function renderReview(review) {
-  const reviewCard = document.getElementById("reviewCard");
-
-  reviewCard.className = "message-card review";
-  reviewCard.innerHTML = `
-    <span class="message-header">Review</span>
-    <div>${review.text.replaceAll("\n", "<br>")}</div>
-    <span class="review-bonus">+${review.xpGain} XP</span>
-  `;
-}
-
-export function renderStatus(state) {
   document.getElementById("levelText").textContent = state.level;
   document.getElementById("xpText").textContent = state.xp;
   document.getElementById("completeCountText").textContent = state.completeCount;
-  document.getElementById("metClientCountText").textContent = state.metClientIds.size;
   document.getElementById("achievementCountText").textContent = state.unlockedAchievements.length;
 
-  document.getElementById("activityCompleteText").textContent = state.completeCount;
-  document.getElementById("activityClientText").textContent = `${state.metClientIds.size}명`;
-}
-
-export function renderProfile(state) {
-  document.getElementById("solverNameText").textContent = state.solverName;
-  document.getElementById("solverBioText").textContent = state.solverBio || "소개가 아직 없습니다.";
-  document.getElementById("avatarInitial").textContent = state.solverName.charAt(0).toUpperCase();
-
   const strongTagList = document.getElementById("strongTagList");
-
-  if (!state.strongTags.length) {
-    strongTagList.innerHTML = `<span class="tag-chip">#태그없음</span>`;
-    return;
-  }
-
   strongTagList.innerHTML = state.strongTags
     .map((tag) => `<span class="tag-chip">#${tag}</span>`)
     .join("");
 }
 
-export function fillProfileEditor(state) {
-  document.getElementById("solverNameInput").value = state.solverName;
-  document.getElementById("solverBioInput").value = state.solverBio;
-  document.getElementById("solverTagsInput").value = state.strongTags.join(", ");
+export function renderSubjectTabs(subjectTabs, currentSubject) {
+  const tabBar = document.getElementById("subjectTabBar");
+
+  tabBar.innerHTML = subjectTabs
+    .map(
+      (subject) => `
+        <button
+          class="subject-tab-btn ${subject === currentSubject ? "active" : ""}"
+          data-subject="${subject}"
+          type="button"
+        >
+          ${subject}
+        </button>
+      `
+    )
+    .join("");
+
+  document.getElementById("currentSubjectTitle").textContent = `${currentSubject} 요청 만들기`;
 }
 
-export function setProfileEditorVisible(isVisible) {
-  const editor = document.getElementById("profileEditor");
-  editor.classList.toggle("hidden", !isVisible);
+export function renderCommissionTypes(types, selectedType) {
+  const list = document.getElementById("commissionTypeList");
+
+  list.innerHTML = types
+    .map(
+      (type) => `
+        <button
+          class="chip-btn ${type === selectedType ? "active" : ""}"
+          data-type="${type}"
+          type="button"
+        >
+          ${type}
+        </button>
+      `
+    )
+    .join("");
+}
+
+export function renderRequestTags(tagPool, selectedTags) {
+  const list = document.getElementById("requestTagList");
+
+  list.innerHTML = tagPool
+    .map(
+      (tag) => `
+        <button
+          class="chip-btn ${selectedTags.includes(tag) ? "active" : ""}"
+          data-tag="${tag}"
+          type="button"
+        >
+          #${tag}
+        </button>
+      `
+    )
+    .join("");
+}
+
+export function renderDmList(dmRequests, selectedDmId) {
+  const dmList = document.getElementById("dmList");
+
+  if (!dmRequests.length) {
+    dmList.innerHTML = `<li class="side-list-item empty">아직 요청이 없습니다.</li>`;
+    return;
+  }
+
+  dmList.innerHTML = dmRequests
+    .map((dm) => {
+      const tags = dm.tags.map((tag) => `#${tag}`).join(" ");
+      return `
+        <li class="side-list-item ${dm.id === selectedDmId ? "selected" : ""}" data-dm-id="${dm.id}">
+          <div class="dm-item-title">
+            <strong>${dm.clientName}</strong>
+            ${dm.isSubmitted ? `<span class="dm-badge">제출완료</span>` : `<span class="dm-badge">새 요청</span>`}
+          </div>
+          <p>${dm.subject} · ${dm.commissionType}</p>
+          <p>${tags}</p>
+        </li>
+      `;
+    })
+    .join("");
+}
+
+export function renderDmDetail(selectedDm) {
+  const card = document.getElementById("dmDetailCard");
+  const workInput = document.getElementById("workInput");
+  const saveBtn = document.getElementById("saveWorkBtn");
+  const submitBtn = document.getElementById("submitWorkBtn");
+
+  if (!selectedDm) {
+    card.className = "message-card empty";
+    card.textContent = "아직 선택된 요청이 없습니다.";
+    workInput.value = "";
+    workInput.disabled = true;
+    saveBtn.disabled = true;
+    submitBtn.disabled = true;
+    return;
+  }
+
+  const tagText = selectedDm.tags.map((tag) => `#${tag}`).join(" ");
+
+  card.className = "message-card";
+  card.innerHTML = `
+    <span class="message-header">Client · ${selectedDm.clientName}</span>
+    <div><strong>${selectedDm.subject}</strong> · ${selectedDm.commissionType}</div>
+    <div>${tagText}</div>
+    <br />
+    <div>${selectedDm.message.replaceAll("\n", "<br>")}</div>
+  `;
+
+  workInput.disabled = false;
+  workInput.value = selectedDm.savedWork || "";
+  saveBtn.disabled = false;
+  submitBtn.disabled = false;
+}
+
+export function renderNotifications(notifications) {
+  const list = document.getElementById("notificationList");
+  const badge = document.getElementById("notificationCount");
+
+  badge.textContent = notifications.length;
+
+  if (!notifications.length) {
+    list.innerHTML = `<li class="side-list-item empty">아직 알림이 없습니다.</li>`;
+    return;
+  }
+
+  list.innerHTML = notifications
+    .map(
+      (notification) => `
+        <li class="side-list-item">
+          <strong>${notification.title}</strong>
+          <p>${notification.body}</p>
+        </li>
+      `
+    )
+    .join("");
 }
 
 export function renderAchievements(unlockedAchievements) {
@@ -91,42 +184,20 @@ export function renderLatestReview(reviewText) {
   latestReviewPreview.innerHTML = reviewText.replaceAll("\n", "<br>");
 }
 
-export function renderMarketPreview(marketClients, trendText, socialLogs) {
-  const marketClientList = document.getElementById("marketClientList");
-  const marketTrendCard = document.getElementById("marketTrendCard");
-  const socialLogList = document.getElementById("socialLogList");
+export function setSideTab(mode) {
+  const dmPanel = document.getElementById("dmPanel");
+  const notificationPanel = document.getElementById("notificationPanel");
+  const dmBtn = document.getElementById("dmTabBtn");
+  const notificationBtn = document.getElementById("notificationTabBtn");
 
-  marketClientList.innerHTML = marketClients
-    .map(
-      (client) => `
-        <div class="market-client-card">
-          <strong>${client.name}</strong>
-          <p>${client.bio}</p>
-        </div>
-      `
-    )
-    .join("");
+  const isDm = mode === "dm";
 
-  marketTrendCard.textContent = trendText;
+  dmPanel.classList.toggle("hidden-panel", !isDm);
+  dmPanel.classList.toggle("active-panel", isDm);
 
-  if (!socialLogs.length) {
-    socialLogList.innerHTML = `<li class="social-log-item empty">아직 로그가 없습니다.</li>`;
-    return;
-  }
+  notificationPanel.classList.toggle("hidden-panel", isDm);
+  notificationPanel.classList.toggle("active-panel", !isDm);
 
-  socialLogList.innerHTML = socialLogs
-    .map((log) => `<li class="social-log-item">${log}</li>`)
-    .join("");
-}
-
-export function resetRequestCard() {
-  const requestCard = document.getElementById("requestCard");
-  requestCard.className = "message-card empty";
-  requestCard.textContent = "아직 도착한 의뢰가 없습니다.";
-}
-
-export function resetReviewCard() {
-  const reviewCard = document.getElementById("reviewCard");
-  reviewCard.className = "message-card empty";
-  reviewCard.textContent = "아직 후기가 없습니다.";
+  dmBtn.classList.toggle("active", isDm);
+  notificationBtn.classList.toggle("active", !isDm);
 }
