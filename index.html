@@ -21,11 +21,39 @@
       <aside class="left-column">
         <section class="panel profile-panel">
           <p class="section-kicker">SOLVER PROFILE</p>
+
           <div class="profile-header">
             <div class="avatar-circle" id="avatarInitial">H</div>
             <div>
               <h2 id="solverNameText">Hazel</h2>
               <p id="solverBioText" class="muted">이해가 되는 설명을 지향합니다.</p>
+            </div>
+          </div>
+
+          <div class="profile-top-actions">
+            <button id="editProfileBtn" class="ghost-btn" type="button">프로필 편집</button>
+          </div>
+
+          <div id="profileEditor" class="profile-editor hidden">
+            <div class="editor-field">
+              <label for="solverNameInput">Solver 이름</label>
+              <input id="solverNameInput" type="text" maxlength="20" placeholder="예: Hazel" />
+            </div>
+
+            <div class="editor-field">
+              <label for="solverBioInput">한 줄 소개</label>
+              <input id="solverBioInput" type="text" maxlength="60" placeholder="예: 이해가 되는 설명을 지향합니다." />
+            </div>
+
+            <div class="editor-field">
+              <label for="solverTagsInput">대표 태그 3개</label>
+              <input id="solverTagsInput" type="text" maxlength="60" placeholder="예: 개념 정리, 구조화, 시험 대비" />
+              <p class="editor-help">쉼표(,)로 구분해 주세요.</p>
+            </div>
+
+            <div class="button-row">
+              <button id="saveProfileBtn" class="primary-btn" type="button">저장</button>
+              <button id="cancelProfileBtn" class="ghost-btn" type="button">취소</button>
             </div>
           </div>
 
