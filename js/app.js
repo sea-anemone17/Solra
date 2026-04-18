@@ -238,6 +238,28 @@ function createTaskTypeId() {
   return `task-type-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 }
 
+function handleEditTaskType(typeId) {
+  const targetType = state.taskTypes.find((type) => type.id === typeId);
+
+  if (!targetType) return;
+
+  state.taskTypeEditor.mode = "edit";
+  state.taskTypeEditor.editingId = targetType.id;
+  state.taskTypeEditor.subjectDraft = targetType.subject;
+  state.taskTypeEditor.nameDraft = targetType.name;
+  state.taskTypeEditor.descriptionDraft = targetType.description || "";
+  state.taskTypeEditor.tagsDraft = (targetType.tags || []).join(", ");
+}
+
+function resetTaskTypeEditor() {
+  state.taskTypeEditor.mode = "create";
+  state.taskTypeEditor.editingId = null;
+  state.taskTypeEditor.subjectDraft = state.currentSubject;
+  state.taskTypeEditor.nameDraft = "";
+  state.taskTypeEditor.descriptionDraft = "";
+  state.taskTypeEditor.tagsDraft = "";
+}
+
 function handleCreateTaskType() {
   const subject = state.taskTypeEditor.subjectDraft;
   const name = state.taskTypeEditor.nameDraft.trim();
@@ -252,6 +274,23 @@ function handleCreateTaskType() {
     return;
   }
 
+  if (state.taskTypeEditor.mode === "edit" && state.taskTypeEditor.editingId) {
+    state.taskTypes = state.taskTypes.map((type) => {
+      if (type.id !== state.taskTypeEditor.editingId) return type;
+
+      return {
+        ...type,
+        subject,
+        name,
+        description,
+        tags
+      };
+    });
+
+    resetTaskTypeEditor();
+    return;
+  }
+
   const newType = {
     id: createTaskTypeId(),
     subject,
@@ -262,11 +301,7 @@ function handleCreateTaskType() {
   };
 
   state.taskTypes = [newType, ...state.taskTypes];
-
-  state.taskTypeEditor.subjectDraft = state.currentSubject;
-  state.taskTypeEditor.nameDraft = "";
-  state.taskTypeEditor.descriptionDraft = "";
-  state.taskTypeEditor.tagsDraft = "";
+  resetTaskTypeEditor();
 }
 
 function handleSaveWork(dmId) {
@@ -330,6 +365,19 @@ function handleClick(event) {
 
   if (action === "create-task-type") {
     handleCreateTaskType();
+    renderApp();
+    return;
+  }
+  
+  if (action === "edit-task-type") {
+    const typeId = target.dataset.typeId;
+    handleEditTaskType(typeId);
+    renderApp();
+    return;
+  }
+
+  if (action === "cancel-task-type-edit") {
+    resetTaskTypeEditor();
     renderApp();
     return;
   }
