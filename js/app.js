@@ -251,6 +251,38 @@ function handleEditTaskType(typeId) {
   state.taskTypeEditor.tagsDraft = (targetType.tags || []).join(", ");
 }
 
+function handleToggleTaskTypeStatus(typeId) {
+  state.taskTypes = state.taskTypes.map((type) => {
+    if (type.id !== typeId) return type;
+
+    return {
+      ...type,
+      status: type.status === "open" ? "closed" : "open"
+    };
+  });
+
+  if (state.taskTypeEditor.editingId === typeId) {
+    const updatedType = state.taskTypes.find((type) => type.id === typeId);
+
+    if (updatedType) {
+      state.taskTypeEditor.subjectDraft = updatedType.subject;
+      state.taskTypeEditor.nameDraft = updatedType.name;
+      state.taskTypeEditor.descriptionDraft = updatedType.description || "";
+      state.taskTypeEditor.tagsDraft = (updatedType.tags || []).join(", ");
+    }
+  }
+}
+
+function handleDeleteTaskType(typeId) {
+  const isEditingCurrent = state.taskTypeEditor.editingId === typeId;
+
+  state.taskTypes = state.taskTypes.filter((type) => type.id !== typeId);
+
+  if (isEditingCurrent) {
+    resetTaskTypeEditor();
+  }
+}
+
 function resetTaskTypeEditor() {
   state.taskTypeEditor.mode = "create";
   state.taskTypeEditor.editingId = null;
@@ -365,6 +397,24 @@ function handleClick(event) {
 
   if (action === "create-task-type") {
     handleCreateTaskType();
+    renderApp();
+    return;
+  }
+
+  if (action === "toggle-task-type-status") {
+    const typeId = target.dataset.typeId;
+    handleToggleTaskTypeStatus(typeId);
+    renderApp();
+    return;
+  }
+
+  if (action === "delete-task-type") {
+    const typeId = target.dataset.typeId;
+    const confirmed = window.confirm("이 Type을 삭제하시겠습니까?");
+
+    if (!confirmed) return;
+
+    handleDeleteTaskType(typeId);
     renderApp();
     return;
   }
