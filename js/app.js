@@ -197,7 +197,8 @@ function renderApp() {
 
   app.innerHTML = renderLayout({
     currentPage: state.currentPage,
-    mainHtml
+    mainHtml,
+    auth: state.auth
   });
 }
 
