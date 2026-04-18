@@ -15,6 +15,7 @@ import { buildTask } from "./logic/task-builder.js";
 import { addDm, saveWork, deliverWork } from "./logic/dm-actions.js";
 import { makeReview } from "./logic/reviews.js";
 import { getAchievements } from "./logic/achievements.js";
+import { getCurrentUser } from "./auth.js";
 
 import { renderLayout } from "./ui/layout.js";
 import { renderHome } from "./ui/home.js";
@@ -402,7 +403,7 @@ function handleInput(event) {
   }
 }
 
-function init() {
+async function init() {
   const app = document.getElementById("app");
 
   app.addEventListener("click", handleClick);
@@ -421,6 +422,14 @@ function init() {
       (solver) => solver.subject === state.currentSubject
     );
     state.selectedMarketSolverId = initialMarketSolvers[0]?.id || null;
+  }
+
+  const { user, error } = await getCurrentUser();
+
+  if (error) {
+    console.error("사용자 확인 실패:", error);
+  } else {
+    console.log("현재 사용자:", user);
   }
 
   refreshProfileState();
