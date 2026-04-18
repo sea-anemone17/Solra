@@ -29,7 +29,7 @@
     </header>
 
     <main class="layout-grid">
-      <!-- 왼쪽: 프로필 -->
+      <!-- 왼쪽 -->
       <aside class="left-panel">
         <section class="panel profile-panel">
           <p class="section-kicker">SOLVER PROFILE</p>
@@ -83,7 +83,7 @@
         </section>
       </aside>
 
-      <!-- 가운데: 요청 생성 -->
+      <!-- 가운데 -->
       <section class="center-panel">
         <section class="panel">
           <p class="section-kicker">REQUEST BUILDER</p>
@@ -137,9 +137,21 @@
             <button id="submitWorkBtn" class="primary-btn" type="button" disabled>제출하기</button>
           </div>
         </section>
+
+        <section class="panel">
+          <div class="panel-head-row">
+            <div>
+              <p class="section-kicker">MARKET</p>
+              <h3>최근 끌올된 커미션주</h3>
+            </div>
+            <button id="refreshMarketBtn" class="ghost-btn" type="button">새로 보기</button>
+          </div>
+
+          <div id="creatorCardList" class="creator-card-list"></div>
+        </section>
       </section>
 
-      <!-- 오른쪽: DM / 알림 -->
+      <!-- 오른쪽 -->
       <aside class="right-panel">
         <section id="dmPanel" class="panel side-panel active-panel">
           <p class="section-kicker">DIRECT MESSAGES</p>
@@ -155,6 +167,14 @@
           <ul id="notificationList" class="side-list">
             <li class="side-list-item empty">아직 알림이 없습니다.</li>
           </ul>
+        </section>
+
+        <section class="panel">
+          <p class="section-kicker">CREATOR PROFILE</p>
+          <h3>솔버 상세</h3>
+          <div id="creatorProfileDetail" class="creator-profile-detail empty">
+            아직 선택된 솔버가 없습니다.
+          </div>
         </section>
       </aside>
     </main>
