@@ -33,5 +33,7 @@ export const state = {
     tagsDraft: ""
   },
 
-  taskTypes: []
+  taskTypes: [],
+
+  selectedMarketSolverId: null
 };
