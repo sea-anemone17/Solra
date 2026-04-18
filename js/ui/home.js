@@ -90,11 +90,15 @@ export function renderHome({
           class="textarea"
           data-action="update-draft"
           placeholder="예: 수열 3문제 풀기 / 영단어 20개 외우기 / 개념 비교 정리"
-        >${draftInput}</textarea>
+        >${draftInput || ""}</textarea>
       </div>
 
       <div class="button-row">
-        <button class="btn btn--primary" data-action="create-task" type="button">
+        <button
+          class="btn btn--primary"
+          data-action="create-task"
+          type="button"
+        >
           Task 생성
         </button>
       </div>
