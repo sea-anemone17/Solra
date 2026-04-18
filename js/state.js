@@ -36,6 +36,8 @@ export const state = {
   taskTypes: [],
 
   taskTypeEditor: {
+    mode: "create",
+    editingId: null,
     subjectDraft: "수학",
     nameDraft: "",
     descriptionDraft: "",
