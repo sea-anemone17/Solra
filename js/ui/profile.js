@@ -130,13 +130,17 @@ function renderProfileEditor(profileEditor) {
 }
 
 function renderTaskTypeEditor(taskTypeEditor) {
+  const isEditMode = taskTypeEditor.mode === "edit";
+
   return `
     <section class="panel">
       <div class="panel-header">
         <div class="panel-header__text">
           <p class="section-eyebrow">TASK TYPE</p>
-          <h2 class="panel-title">새 Type 열기</h2>
-          <p class="panel-subtitle">내가 받을 수 있는 Task Type을 직접 추가합니다.</p>
+          <h2 class="panel-title">${isEditMode ? "Type 수정" : "새 Type 열기"}</h2>
+          <p class="panel-subtitle">
+            ${isEditMode ? "기존 Type 내용을 수정합니다." : "내가 받을 수 있는 Task Type을 직접 추가합니다."}
+          </p>
         </div>
       </div>
 
@@ -205,8 +209,18 @@ function renderTaskTypeEditor(taskTypeEditor) {
 
         <div class="button-row">
           <button class="btn btn--primary" data-action="create-task-type" type="button">
-            Type 열기
+            ${isEditMode ? "Type 저장" : "Type 열기"}
           </button>
+
+          ${
+            isEditMode
+              ? `
+                <button class="btn btn--ghost" data-action="cancel-task-type-edit" type="button">
+                  취소
+                </button>
+              `
+              : ""
+          }
         </div>
       </div>
     </section>
@@ -241,6 +255,17 @@ function renderTaskTypeList(taskTypes) {
 
                       <div class="chip-list">
                         ${(type.tags || []).map((tag) => `<span class="chip">#${tag}</span>`).join("")}
+                      </div>
+
+                      <div class="button-row" style="margin-top: 12px;">
+                        <button
+                          class="btn btn--ghost"
+                          data-action="edit-task-type"
+                          data-type-id="${type.id}"
+                          type="button"
+                        >
+                          수정
+                        </button>
                       </div>
                     </div>
                   `
