@@ -7,7 +7,7 @@ function pickRandom(array) {
 export function generateRequest(taskText) {
   const client = pickRandom(clients);
   const template = pickRandom(client.requestTemplates);
-  const message = template.replace("{task}", taskText);
+  const message = template.replaceAll("{task}", taskText);
 
   return {
     clientId: client.id,
