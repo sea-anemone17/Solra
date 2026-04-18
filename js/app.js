@@ -203,41 +203,6 @@ function renderCurrentPage() {
   `;
 }
 
-  if (state.currentPage === "dm") {
-    return renderDm({
-      dmRequests: state.dmRequests,
-      selectedClientName: state.selectedClientName,
-      reviews: state.reviews
-    });
-  }
-
-  if (state.currentPage === "profile") {
-    return renderProfile({
-      profile: state.profile,
-      reviews: state.reviews,
-      taskTypes: state.taskTypes,
-      profileEditor: state.profileEditor,
-      taskTypeEditor: state.taskTypeEditor
-    });
-  }
-
-  if (state.currentPage === "notifications") {
-    return renderNotifications({
-      notifications: state.notifications,
-      reviews: state.reviews
-    });
-  }
-
-  return `
-    <section class="panel">
-      <div class="empty-state">
-        <p class="empty-state__title">페이지를 찾을 수 없습니다</p>
-        <p class="empty-state__text">홈으로 돌아가 주세요.</p>
-      </div>
-    </section>
-  `;
-}
-
 function renderApp() {
   const app = document.getElementById("app");
 
