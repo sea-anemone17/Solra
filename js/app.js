@@ -114,9 +114,9 @@ function handleDeliverWork(dmId) {
   if (!dm) return;
   if (dm.status === "completed") return;
 
-  const alreadyReviewed = state.reviews.some((review) => review.taskId === dmId);
+  const alreadyReviewed = state.reviews.some((r) => r.taskId === dmId);
   if (alreadyReviewed) return;
-
+  
   const workText = (dm.savedWork || "").trim();
 
   if (!workText) {
