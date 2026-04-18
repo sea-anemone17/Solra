@@ -308,3 +308,32 @@
   display: grid;
   gap: 14px;
 }
+
+.account-panel {
+  padding: 14px 16px;
+}
+
+.account-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.account-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.account-email {
+  color: var(--text-strong);
+  font-size: 0.92rem;
+}
+
+.account-status-text {
+  color: var(--text-soft);
+  font-size: 0.88rem;
+}
