@@ -837,3 +837,23 @@ img {
   border-color: var(--accent-strong);
   background: #f3fbf4;
 }
+
+.dm-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.dm-attachment-card {
+  display: grid;
+  gap: 8px;
+  max-width: 180px;
+}
+
+.dm-attachment-image {
+  width: 100%;
+  max-width: 180px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  object-fit: cover;
+}
