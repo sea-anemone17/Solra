@@ -2,8 +2,6 @@ export const state = {
   currentPage: "home",
 
   currentSubject: "수학",
-  currentTaskTypeId: null,
-  currentTaskType: "문제 풀이",
   selectedTaskTypeId: null,
   selectedTags: ["고2"],
 
@@ -24,7 +22,8 @@ export const state = {
     xp: 0,
     completeCount: 0,
     reviewCount: 0,
-    achievements: []
+    achievements: [],
+    avatarUrl: ""
   },
 
   profileEditor: {
@@ -48,9 +47,9 @@ export const state = {
   selectedMarketSolverId: null,
 
   auth: {
-   user: null,
-   emailDraft: "",
-   passwordDraft: "",
-   statusMessage: ""
-  },
+    user: null,
+    emailDraft: "",
+    passwordDraft: "",
+    statusMessage: ""
+  }
 };
