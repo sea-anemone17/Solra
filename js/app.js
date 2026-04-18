@@ -1,306 +1,45 @@
-import { getUnlockedAchievements } from "./achievements.js";
-import {
-  subjectTabs,
-  commissionTypesBySubject,
-  requestTagPool,
-  clientsBySubject,
-  mockCreatorsBySubject
-} from "./data.js";
-import {
-  renderProfile,
-  renderSubjectTabs,
-  renderCommissionTypes,
-  renderRequestTags,
-  renderDmList,
-  renderDmDetail,
-  renderNotifications,
-  renderAchievements,
-  renderLatestReview,
-  setSideTab,
-  renderCreatorCards,
-  renderCreatorDetail
-} from "./ui.js";
+import { state } from "./state.js";
+import { SUBJECTS, TASK_TYPES, TAG_POOL, CLIENT_NAMES } from "./data.js";
+import { buildTask } from "./logic/task-builder.js";
+import { addDm, saveWork, deliverWork } from "./logic/dm-actions.js";
+import { makeReview } from "./logic/reviews.js";
+import { getAchievements } from "./logic/achievements.js";
 
-const generateBtn = document.getElementById("generateBtn");
-const resetBtn = document.getElementById("resetBtn");
-const refreshMarketBtn = document.getElementById("refreshMarketBtn");
-const workInput = document.getElementById("workInput");
-const saveWorkBtn = document.getElementById("saveWorkBtn");
-const submitWorkBtn = document.getElementById("submitWorkBtn");
-const dmTabBtn = document.getElementById("dmTabBtn");
-const notificationTabBtn = document.getElementById("notificationTabBtn");
-const questInput = document.getElementById("questInput");
+import { renderLayout } from "./ui/layout.js";
+import { renderHome } from "./ui/home.js";
+import { renderDm } from "./ui/dm.js";
+import { renderProfile } from "./ui/profile.js";
+import { renderNotifications } from "./ui/notifications.js";
 
-const state = {
-  solverName: "Hazel",
-  solverBio: "이해가 되는 설명을 지향합니다.",
-  strongTags: ["고2 대상", "구조화", "시험 대비"],
-  xp: 0,
-  level: 1,
-  completeCount: 0,
-  unlockedAchievementIds: new Set(),
-  unlockedAchievements: [],
-  currentSubject: "수학",
-  currentCommissionType: "문제 풀이",
-  selectedTags: ["고2"],
-  dmRequests: [],
-  selectedDmId: null,
-  notifications: [],
-  recentReviews: [],
-  sideMode: "dm",
-  visibleCreators: [],
-  selectedCreatorId: null
-};
+function getSelectedDm() { ... }
 
-function pickRandom(array) {
-  return array[Math.floor(Math.random() * array.length)];
-}
+function pushNotification(title, body) { ... }
 
-function shuffle(array) {
-  const copied = [...array];
-  for (let i = copied.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [copied[i], copied[j]] = [copied[j], copied[i]];
-  }
-  return copied;
-}
+function refreshDerivedState() { ... }
 
-function createId() {
-  return `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
-}
+function renderApp() {
+  const homeHtml = renderHome(...);
+  const dmHtml = renderDm(...);
+  const profileHtml = renderProfile(...);
+  const notificationsHtml = renderNotifications(...);
 
-function updateLevel() {
-  state.level = Math.floor(state.xp / 30) + 1;
-}
-
-function pushNotification(title, body) {
-  state.notifications.unshift({ title, body });
-
-  if (state.notifications.length > 8) {
-    state.notifications.pop();
-  }
-}
-
-function createRequestMessage(subject, type, taskText) {
-  return `${subject} 탭에서 '${type}' 유형 요청이 도착했습니다.\n${taskText} 작업을 부탁드릴게요.`;
-}
-
-function createClientName(subject) {
-  return pickRandom(clientsBySubject[subject]);
-}
-
-function getSelectedDm() {
-  return state.dmRequests.find((dm) => dm.id === state.selectedDmId) || null;
-}
-
-function getSelectedCreator() {
-  return state.visibleCreators.find((creator) => creator.id === state.selectedCreatorId) || null;
-}
-
-function refreshVisibleCreators() {
-  const pool = mockCreatorsBySubject[state.currentSubject] || [];
-  state.visibleCreators = shuffle(pool).slice(0, 4);
-  state.selectedCreatorId = state.visibleCreators[0]?.id || null;
-}
-
-function applyNewAchievements() {
-  const newAchievements = getUnlockedAchievements(state);
-
-  if (!newAchievements.length) return;
-
-  newAchievements.forEach((achievement) => {
-    state.unlockedAchievementIds.add(achievement.id);
-    state.unlockedAchievements.push(achievement);
-    pushNotification("업적 해금", `${achievement.title} 업적이 해금되었습니다.`);
+  document.getElementById("app").innerHTML = renderLayout({
+    homeHtml,
+    dmHtml,
+    profileHtml,
+    notificationsHtml
   });
 }
 
-function updateAllUI() {
-  renderProfile(state);
-  renderSubjectTabs(subjectTabs, state.currentSubject);
-  renderCommissionTypes(
-    commissionTypesBySubject[state.currentSubject],
-    state.currentCommissionType
-  );
-  renderRequestTags(requestTagPool, state.selectedTags);
-  renderDmList(state.dmRequests, state.selectedDmId);
-  renderDmDetail(getSelectedDm());
-  renderNotifications(state.notifications);
-  renderAchievements(state.unlockedAchievements);
-  renderLatestReview(state.recentReviews[0] || "");
-  setSideTab(state.sideMode);
-  renderCreatorCards(state.visibleCreators, state.selectedCreatorId);
-  renderCreatorDetail(getSelectedCreator());
+function handleClick(event) { ... }
+
+function handleInput(event) { ... }
+
+function init() {
+  const app = document.getElementById("app");
+  app.addEventListener("click", handleClick);
+  app.addEventListener("input", handleInput);
+  renderApp();
 }
 
-generateBtn.addEventListener("click", () => {
-  const taskText = questInput.value.trim();
-
-  if (!taskText) {
-    alert("작업을 입력해 주세요.");
-    return;
-  }
-
-  const newDm = {
-    id: createId(),
-    subject: state.currentSubject,
-    commissionType: state.currentCommissionType,
-    tags: [...state.selectedTags],
-    clientName: createClientName(state.currentSubject),
-    message: createRequestMessage(state.currentSubject, state.currentCommissionType, taskText),
-    savedWork: "",
-    isSubmitted: false
-  };
-
-  state.dmRequests.unshift(newDm);
-  state.selectedDmId = newDm.id;
-
-  pushNotification(
-    "새 요청 도착",
-    `${state.currentSubject} 탭에 새로운 DM 요청이 도착했습니다.`
-  );
-
-  questInput.value = "";
-  state.sideMode = "dm";
-  updateAllUI();
-});
-
-resetBtn.addEventListener("click", () => {
-  state.currentSubject = "수학";
-  state.currentCommissionType = commissionTypesBySubject["수학"][0];
-  state.selectedTags = ["고2"];
-  state.dmRequests = [];
-  state.selectedDmId = null;
-  state.notifications = [];
-  state.recentReviews = [];
-  state.xp = 0;
-  state.level = 1;
-  state.completeCount = 0;
-  state.unlockedAchievementIds = new Set();
-  state.unlockedAchievements = [];
-  state.sideMode = "dm";
-  questInput.value = "";
-  workInput.value = "";
-
-  refreshVisibleCreators();
-  updateAllUI();
-});
-
-refreshMarketBtn.addEventListener("click", () => {
-  refreshVisibleCreators();
-  pushNotification("시장 갱신", `${state.currentSubject} 탭의 최근 끌올 목록이 새로고침되었습니다.`);
-  updateAllUI();
-});
-
-saveWorkBtn.addEventListener("click", () => {
-  const selectedDm = getSelectedDm();
-  if (!selectedDm) return;
-
-  selectedDm.savedWork = workInput.value.trim();
-
-  pushNotification(
-    "작업물 저장",
-    `${selectedDm.subject} 요청의 작업물이 임시 저장되었습니다.`
-  );
-
-  updateAllUI();
-});
-
-submitWorkBtn.addEventListener("click", () => {
-  const selectedDm = getSelectedDm();
-  if (!selectedDm) return;
-
-  const submittedText = workInput.value.trim();
-
-  if (!submittedText) {
-    alert("제출할 작업물을 입력해 주세요.");
-    return;
-  }
-
-  selectedDm.savedWork = submittedText;
-  selectedDm.isSubmitted = true;
-
-  state.xp += 10;
-  state.completeCount += 1;
-  updateLevel();
-
-  const reviewText = `작업물이 제출되었습니다.\n${selectedDm.subject} · ${selectedDm.commissionType} 요청에 대해 Client가 긍정적인 반응을 보였습니다.`;
-  state.recentReviews.unshift(reviewText);
-
-  if (state.recentReviews.length > 3) {
-    state.recentReviews.pop();
-  }
-
-  pushNotification(
-    "후기 도착",
-    `${selectedDm.clientName} 님이 작업물에 대한 반응을 남겼습니다.`
-  );
-
-  applyNewAchievements();
-  updateAllUI();
-});
-
-dmTabBtn.addEventListener("click", () => {
-  state.sideMode = "dm";
-  updateAllUI();
-});
-
-notificationTabBtn.addEventListener("click", () => {
-  state.sideMode = "notification";
-  updateAllUI();
-});
-
-document.addEventListener("click", (event) => {
-  const subjectBtn = event.target.closest("[data-subject]");
-  if (subjectBtn) {
-    state.currentSubject = subjectBtn.dataset.subject;
-    state.currentCommissionType = commissionTypesBySubject[state.currentSubject][0];
-    refreshVisibleCreators();
-    updateAllUI();
-    return;
-  }
-
-  const typeBtn = event.target.closest("[data-type]");
-  if (typeBtn) {
-    state.currentCommissionType = typeBtn.dataset.type;
-    updateAllUI();
-    return;
-  }
-
-  const tagBtn = event.target.closest("[data-tag]");
-  if (tagBtn) {
-    const tag = tagBtn.dataset.tag;
-
-    if (state.selectedTags.includes(tag)) {
-      state.selectedTags = state.selectedTags.filter((item) => item !== tag);
-    } else {
-      state.selectedTags = [...state.selectedTags, tag];
-    }
-
-    updateAllUI();
-    return;
-  }
-
-  const dmItem = event.target.closest("[data-dm-id]");
-  if (dmItem) {
-    state.selectedDmId = dmItem.dataset.dmId;
-    updateAllUI();
-    return;
-  }
-
-  const creatorItem = event.target.closest("[data-creator-id]");
-  if (creatorItem) {
-    state.selectedCreatorId = creatorItem.dataset.creatorId;
-    updateAllUI();
-  }
-});
-
-workInput.addEventListener("input", () => {
-  const selectedDm = getSelectedDm();
-  if (!selectedDm) return;
-  selectedDm.savedWork = workInput.value;
-});
-
-state.currentCommissionType = commissionTypesBySubject[state.currentSubject][0];
-refreshVisibleCreators();
-updateAllUI();updateAllUI();
+init();
