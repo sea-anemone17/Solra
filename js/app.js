@@ -233,3 +233,5 @@ function init() {
   refreshProfileState();
   renderApp();
 }
+
+init();
