@@ -124,7 +124,13 @@ function getReviewTemplatePool(subject) {
 
 function renderCurrentPage() {
   if (state.currentPage === "home") {
-    const taskTypes = TASK_TYPES[state.currentSubject] || [];
+    const baseTaskTypes = TASK_TYPES[state.currentSubject] || [];
+    const customTaskTypes = state.taskTypes
+      .filter((type) => type.subject === state.currentSubject && type.status === "open")
+      .map((type) => type.name);
+
+    const taskTypes = [...baseTaskTypes, ...customTaskTypes];
+    
     const marketSolvers = MOCK_SOLVERS.filter(
       (solver) => solver.subject === state.currentSubject
     );
