@@ -284,3 +284,18 @@ function init() {
 }
 
 init();
+
+function showError(err) {
+  const app = document.getElementById("app");
+  app.innerHTML = `
+    <pre style="padding:16px; color:#b00020; white-space:pre-wrap; font-size:14px; line-height:1.5;">
+${err && err.stack ? err.stack : err}
+    </pre>
+  `;
+}
+
+try {
+  init();
+} catch (err) {
+  showError(err);
+}
