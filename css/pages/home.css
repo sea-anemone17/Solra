@@ -72,26 +72,3 @@
   font-size: 0.88rem;
   line-height: 1.55;
 }
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  min-height: 36px;
-  padding: 0 12px;
-  border-radius: 999px;
-  background: #ffffff;
-  border: 1px solid var(--line);
-  color: var(--text-soft);
-  font-size: 0.86rem;
-  font-weight: 700;
-  transition:
-    background-color var(--transition-fast),
-    border-color var(--transition-fast),
-    color var(--transition-fast);
-}
-
-.chip.is-active {
-  background: #eef9f0;
-  border-color: #cce8d2;
-  color: var(--accent-deep);
-}
