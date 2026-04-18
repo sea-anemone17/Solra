@@ -337,3 +337,52 @@
   color: var(--text-soft);
   font-size: 0.88rem;
 }
+
+
+.panel,
+.card {
+  transition:
+    border-color var(--motion-base) var(--ease-standard),
+    box-shadow var(--motion-base) var(--ease-standard),
+    background-color var(--motion-base) var(--ease-standard),
+    transform var(--motion-base) var(--ease-soft);
+}
+
+.btn {
+  transition:
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-soft);
+}
+
+.btn:hover {
+  transform: translateY(var(--lift-y));
+}
+
+.btn:active {
+  transform: scale(var(--press-scale));
+}
+
+.input,
+.textarea {
+  transition:
+    border-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard);
+}
+
+.chip,
+.subject-tab,
+.page-tab,
+.task-type-item,
+.list-item,
+.market-card {
+  transition:
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-soft);
+}
