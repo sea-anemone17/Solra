@@ -8,21 +8,32 @@
 </head>
 <body>
   <div class="app-shell">
-    <header class="topbar">
-      <div class="brand-block">
-        <p class="eyebrow">CLIENT × SOLVER PLATFORM</p>
-        <h1>Solra</h1>
-        <p class="subtitle">공부를 의뢰처럼 처리하는 플랫폼형 게임</p>
+    <header class="app-header">
+      <div class="brand-area">
+        <div>
+          <p class="eyebrow">SOLRA PLATFORM</p>
+          <h1>Solra</h1>
+          <p class="subtitle">공부를 의뢰처럼 처리하는 청량한 작업 플랫폼</p>
+        </div>
+
+        <div class="header-right">
+          <button id="dmTabBtn" class="header-pill active" type="button">DM</button>
+          <button id="notificationTabBtn" class="header-pill" type="button">
+            알림
+            <span id="notificationCount" class="count-badge">0</span>
+          </button>
+        </div>
       </div>
+
+      <nav id="subjectTabBar" class="subject-tab-bar"></nav>
     </header>
 
-    <main class="dashboard-grid">
-      <!-- 왼쪽 컬럼 -->
-      <aside class="left-column">
+    <main class="layout-grid">
+      <!-- 왼쪽: 프로필 -->
+      <aside class="left-panel">
         <section class="panel profile-panel">
           <p class="section-kicker">SOLVER PROFILE</p>
-
-          <div class="profile-header">
+          <div class="profile-head">
             <div class="avatar-circle" id="avatarInitial">H</div>
             <div>
               <h2 id="solverNameText">Hazel</h2>
@@ -30,168 +41,122 @@
             </div>
           </div>
 
-          <div class="profile-top-actions">
-            <button id="editProfileBtn" class="ghost-btn" type="button">프로필 편집</button>
-          </div>
-
-          <div id="profileEditor" class="profile-editor hidden">
-            <div class="editor-field">
-              <label for="solverNameInput">Solver 이름</label>
-              <input id="solverNameInput" type="text" maxlength="20" placeholder="예: Hazel" />
+          <div class="profile-stats">
+            <div class="stat-card">
+              <span>레벨</span>
+              <strong id="levelText">1</strong>
             </div>
-
-            <div class="editor-field">
-              <label for="solverBioInput">한 줄 소개</label>
-              <input id="solverBioInput" type="text" maxlength="60" placeholder="예: 이해가 되는 설명을 지향합니다." />
-            </div>
-
-            <div class="editor-field">
-              <label for="solverTagsInput">대표 태그 3개</label>
-              <input id="solverTagsInput" type="text" maxlength="60" placeholder="예: 개념 정리, 구조화, 시험 대비" />
-              <p class="editor-help">쉼표(,)로 구분해 주세요.</p>
-            </div>
-
-            <div class="button-row">
-              <button id="saveProfileBtn" class="primary-btn" type="button">저장</button>
-              <button id="cancelProfileBtn" class="ghost-btn" type="button">취소</button>
-            </div>
-          </div>
-
-          <div class="level-badge">
-            <span>Lv.</span>
-            <strong id="levelText">1</strong>
-          </div>
-
-          <div class="mini-stat-grid">
-            <div class="mini-stat">
+            <div class="stat-card">
               <span>XP</span>
               <strong id="xpText">0</strong>
             </div>
-            <div class="mini-stat">
-              <span>완료 의뢰</span>
+            <div class="stat-card">
+              <span>완료</span>
               <strong id="completeCountText">0</strong>
             </div>
-            <div class="mini-stat">
-              <span>만난 Client</span>
-              <strong id="metClientCountText">0</strong>
-            </div>
-            <div class="mini-stat">
+            <div class="stat-card">
               <span>업적</span>
               <strong id="achievementCountText">0</strong>
             </div>
           </div>
 
-          <div class="tag-area">
+          <div>
             <p class="subheading">대표 태그</p>
-            <div id="strongTagList" class="tag-list"></div>
+            <div id="strongTagList" class="chip-list"></div>
           </div>
         </section>
 
         <section class="panel">
-          <div class="panel-header-inline">
-            <div>
-              <p class="section-kicker">ACTIVITY</p>
-              <h3>활동 이력</h3>
-            </div>
-          </div>
-
-          <div class="activity-grid">
-            <div class="activity-card">
-              <span>총 완료 수</span>
-              <strong id="activityCompleteText">0</strong>
-            </div>
-            <div class="activity-card">
-              <span>최근 만난 Client</span>
-              <strong id="activityClientText">0명</strong>
-            </div>
-          </div>
-
-          <div class="latest-review-wrap">
-            <p class="subheading">대표 후기</p>
-            <div id="latestReviewPreview" class="preview-card empty">
-              아직 대표 후기가 없습니다.
-            </div>
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="panel-header-inline">
-            <div>
-              <p class="section-kicker">ACHIEVEMENTS</p>
-              <h3>업적</h3>
-            </div>
-          </div>
+          <p class="section-kicker">ACHIEVEMENTS</p>
+          <h3>업적</h3>
           <ul id="achievementList" class="achievement-list">
             <li class="achievement-item locked">아직 해금된 업적이 없습니다.</li>
           </ul>
         </section>
+
+        <section class="panel">
+          <p class="section-kicker">RECENT REVIEW</p>
+          <h3>대표 후기</h3>
+          <div id="latestReviewPreview" class="preview-card empty">
+            아직 대표 후기가 없습니다.
+          </div>
+        </section>
       </aside>
 
-      <!-- 오른쪽 컬럼 -->
-      <section class="right-column">
+      <!-- 가운데: 요청 생성 -->
+      <section class="center-panel">
         <section class="panel">
-          <p class="section-kicker">REQUEST DESK</p>
-          <h2>오늘의 작업</h2>
-          <p class="panel-desc">오늘 처리할 공부를 입력하면 Client 의뢰로 변환됩니다.</p>
+          <p class="section-kicker">REQUEST BUILDER</p>
+          <h2 id="currentSubjectTitle">수학 요청 만들기</h2>
+          <p class="panel-desc">과목 탭과 커미션 타입을 고르고, 오늘 할 작업을 요청 형태로 생성합니다.</p>
 
-          <label for="questInput" class="input-label">작업 입력</label>
-          <input
-            id="questInput"
-            type="text"
-            placeholder="예: 수열 3문제 풀기 / 영단어 20개 외우기 / 세계지리 기후 정리하기"
-          />
+          <div class="field-group">
+            <label class="field-label">커미션 타입</label>
+            <div id="commissionTypeList" class="chip-list"></div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">요청 태그</label>
+            <div id="requestTagList" class="chip-list"></div>
+          </div>
+
+          <div class="field-group">
+            <label for="questInput" class="field-label">작업 입력</label>
+            <input
+              id="questInput"
+              type="text"
+              placeholder="예: 수열 3문제 풀기 / 영단어 20개 외우기 / 세계지리 기후 정리하기"
+            />
+          </div>
 
           <div class="button-row">
-            <button id="generateBtn" class="primary-btn">의뢰 받기</button>
-            <button id="completeBtn" class="secondary-btn" disabled>작업 완료</button>
+            <button id="generateBtn" class="primary-btn" type="button">요청 생성</button>
             <button id="resetBtn" class="ghost-btn" type="button">초기화</button>
           </div>
         </section>
 
-        <section class="stack-grid">
-          <section class="panel">
-            <p class="section-kicker">CURRENT REQUEST</p>
-            <h3>현재 의뢰</h3>
-            <div id="requestCard" class="message-card empty">
-              아직 도착한 의뢰가 없습니다.
-            </div>
-          </section>
-
-          <section class="panel">
-            <p class="section-kicker">REVIEW</p>
-            <h3>후기</h3>
-            <div id="reviewCard" class="message-card empty">
-              아직 후기가 없습니다.
-            </div>
-          </section>
-        </section>
-
         <section class="panel">
-          <div class="panel-header-inline">
-            <div>
-              <p class="section-kicker">MARKET PREVIEW</p>
-              <h3>시장 미리보기</h3>
-            </div>
+          <p class="section-kicker">REQUEST DETAIL</p>
+          <h3>현재 선택된 DM</h3>
+
+          <div id="dmDetailCard" class="message-card empty">
+            아직 선택된 요청이 없습니다.
           </div>
 
-          <div id="marketClientList" class="market-client-list"></div>
+          <div class="field-group">
+            <label for="workInput" class="field-label">작업물</label>
+            <textarea
+              id="workInput"
+              rows="7"
+              placeholder="문제 풀이 메모, 설명 정리, 인증 문장 등을 입력해 주세요."
+            ></textarea>
+          </div>
 
-          <div class="market-bottom-grid">
-            <div>
-              <p class="subheading">요즘 많이 찾는 요청</p>
-              <div id="marketTrendCard" class="preview-card">
-                아직 시장 정보가 없습니다.
-              </div>
-            </div>
-            <div>
-              <p class="subheading">시장 로그</p>
-              <ul id="socialLogList" class="social-log-list">
-                <li class="social-log-item empty">아직 로그가 없습니다.</li>
-              </ul>
-            </div>
+          <div class="button-row">
+            <button id="saveWorkBtn" class="secondary-btn" type="button" disabled>임시 저장</button>
+            <button id="submitWorkBtn" class="primary-btn" type="button" disabled>제출하기</button>
           </div>
         </section>
       </section>
+
+      <!-- 오른쪽: DM / 알림 -->
+      <aside class="right-panel">
+        <section id="dmPanel" class="panel side-panel active-panel">
+          <p class="section-kicker">DIRECT MESSAGES</p>
+          <h3>DM함</h3>
+          <ul id="dmList" class="side-list">
+            <li class="side-list-item empty">아직 요청이 없습니다.</li>
+          </ul>
+        </section>
+
+        <section id="notificationPanel" class="panel side-panel hidden-panel">
+          <p class="section-kicker">NOTIFICATIONS</p>
+          <h3>알림함</h3>
+          <ul id="notificationList" class="side-list">
+            <li class="side-list-item empty">아직 알림이 없습니다.</li>
+          </ul>
+        </section>
+      </aside>
     </main>
   </div>
 
