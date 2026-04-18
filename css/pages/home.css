@@ -16,35 +16,51 @@
 
 .subject-tab {
   flex: 0 0 auto;
-  min-height: 42px;
-  padding: 0 16px;
-  border: 1px solid #dfe4ea;
+  min-height: 40px;
+  padding: 0 15px;
+  border: 1px solid #e3e7ec;
   border-radius: 999px;
   background: #ffffff;
   color: var(--text-soft);
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.93rem;
   transition:
-    background-color var(--transition-fast),
     border-color var(--transition-fast),
-    color var(--transition-fast),
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast);
+    background-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .subject-tab:hover {
-  transform: translateY(-1px);
-  border-color: #cfd8e3;
+  border-color: #d5dde6;
   color: var(--text-strong);
 }
 
 .subject-tab.is-active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #ffffff;
-  box-shadow: 0 8px 18px rgba(52, 199, 89, 0.16);
+  background: #eef8f0;
+  border-color: #cfe4d4;
+  color: var(--accent-deep);
+  box-shadow: none;
 }
 
+/* 섹션 간격을 더 분명하게 */
+.field-group {
+  display: grid;
+  gap: 10px;
+}
+
+.field-group + .field-group {
+  margin-top: 18px;
+}
+
+.field-label {
+  margin-bottom: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-strong);
+  letter-spacing: -0.01em;
+}
+
+/* 태그/칩: 조용하게 */
 .chip-list {
   display: flex;
   flex-wrap: wrap;
@@ -54,99 +70,169 @@
 .chip {
   display: inline-flex;
   align-items: center;
-  min-height: 36px;
+  min-height: 34px;
   padding: 0 12px;
   border-radius: 999px;
   background: #ffffff;
-  border: 1px solid var(--line);
+  border: 1px solid #e5e7eb;
   color: var(--text-soft);
-  font-size: 0.86rem;
+  font-size: 0.84rem;
   font-weight: 700;
   transition:
-    background-color var(--transition-fast),
     border-color var(--transition-fast),
+    background-color var(--transition-fast),
     color var(--transition-fast);
 }
 
+.chip:hover {
+  border-color: #d6dbe1;
+  color: var(--text-strong);
+}
+
 .chip.is-active {
-  background: #eef9f0;
-  border-color: #cce8d2;
+  background: #f3faf4;
+  border-color: #d6ead9;
   color: var(--accent-deep);
 }
 
-.field-group + .field-group {
-  margin-top: 2px;
+/* Type 목록: 선택 리스트처럼 */
+.task-type-list {
+  display: grid;
+  gap: 10px;
 }
 
-.field-label {
-  margin-bottom: 2px;
+.task-type-item {
+  width: 100%;
+  text-align: left;
+  min-height: 46px;
+  padding: 0 15px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+  color: var(--text-soft);
+  font-weight: 700;
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
+.task-type-item:hover {
+  border-color: #d7dde3;
+  color: var(--text-strong);
+}
+
+.task-type-item.is-selected {
+  background: #f6fbf7;
+  border-color: #d4e7d8;
+  color: var(--accent-deep);
+  box-shadow: none;
+}
+
+.task-type-item__name {
+  display: block;
+  font-size: 0.94rem;
+  letter-spacing: -0.01em;
+}
+
+/* 선택 상세: 카드보다 문서 블록처럼 */
+.task-type-detail {
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid #e7eaee;
+  background: #fbfcfd;
+  box-shadow: none;
+}
+
+.task-type-detail__title {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 1.03rem;
+  font-weight: 800;
+  color: var(--text-strong);
+  letter-spacing: -0.02em;
+}
+
+.task-type-detail .muted {
+  font-size: 0.94rem;
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+/* 입력창: 여백 넉넉하게, 튀지 않게 */
 .textarea {
   min-height: 150px;
   padding: 16px;
   border: 1px solid #dfe4ea;
   background: #ffffff;
+  border-radius: 14px;
+  line-height: 1.7;
 }
 
 .textarea::placeholder {
   color: #98a2b3;
-  font-size: 0.98rem;
+  font-size: 0.96rem;
 }
 
+/* 버튼: 앱 느낌은 남기되 덜 튀게 */
 .button-row {
-  margin-top: 6px;
+  margin-top: 10px;
 }
 
 .btn--primary {
-  min-width: 132px;
+  min-width: 128px;
+  box-shadow: none;
 }
 
+.btn--primary:hover {
+  box-shadow: none;
+}
+
+/* 마켓 카드: 서비스 느낌은 유지 */
 .market-card {
   width: 100%;
   text-align: left;
   background: #ffffff;
-  border: 1px solid var(--line);
-  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
   padding: 14px;
   transition:
-    transform var(--transition-fast),
     border-color var(--transition-fast),
-    box-shadow var(--transition-fast),
     background-color var(--transition-fast);
 }
 
 .market-card:hover {
-  transform: translateY(-1px);
-  border-color: #d3dae3;
-  box-shadow: var(--shadow-sm);
+  border-color: #d8dee5;
+  box-shadow: none;
+  transform: none;
 }
 
 .market-card.is-selected {
-  border-color: rgba(52, 199, 89, 0.24);
-  background: #f5fcf6;
+  border-color: #d7e7db;
+  background: #f8fbf8;
 }
 
 .market-card strong {
-  font-size: 0.96rem;
+  font-size: 0.95rem;
   color: var(--text-strong);
 }
 
 .market-card .muted {
   font-size: 0.87rem;
-  line-height: 1.55;
+  line-height: 1.6;
 }
 
+/* 모바일 */
 @media (max-width: 700px) {
   .subject-tab {
-    min-height: 40px;
+    min-height: 38px;
     padding: 0 14px;
-    font-size: 0.92rem;
+    font-size: 0.9rem;
   }
 
   .chip {
-    min-height: 34px;
-    font-size: 0.84rem;
+    min-height: 32px;
+    font-size: 0.82rem;
   }
 
   .textarea {
@@ -156,54 +242,8 @@
   .btn--primary {
     width: 100%;
   }
-}
 
-
-.task-type-list {
-  display: grid;
-  gap: 10px;
-}
-
-.task-type-item {
-  width: 100%;
-  text-align: left;
-  min-height: 48px;
-  padding: 0 16px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: #ffffff;
-  color: var(--text-soft);
-  font-weight: 700;
-  transition:
-    border-color var(--transition-fast),
-    background-color var(--transition-fast),
-    color var(--transition-fast),
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast);
-}
-
-.task-type-item:hover {
-  transform: translateY(-1px);
-  border-color: #d3dae3;
-  color: var(--text-strong);
-}
-
-.task-type-item.is-selected {
-  background: #f5fcf6;
-  border-color: rgba(52, 199, 89, 0.28);
-  color: var(--accent-deep);
-  box-shadow: 0 8px 18px rgba(52, 199, 89, 0.08);
-}
-
-.task-type-item__name {
-  display: block;
-  font-size: 0.95rem;
-  letter-spacing: -0.01em;
-}
-
-.task-type-detail__title {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 1.02rem;
-  color: var(--text-strong);
+  .field-group + .field-group {
+    margin-top: 16px;
+  }
 }
