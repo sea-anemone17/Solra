@@ -68,6 +68,34 @@ export const clients = [
         "설명이 차분해서 좋았어요.\n다음에도 부탁드릴게요."
       ]
     }
+  },
+  {
+    id: "writing",
+    name: "서술형 불안 학생",
+    requestTemplates: [
+      "{task}를 서술형으로 정리해야 하는데 방향이 안 보여요.\n흐름을 잡아 주실 수 있나요?",
+      "답은 알겠는데 글로 쓰려면 막혀요.\n{task}를 문장 흐름 중심으로 부탁드려요."
+    ],
+    reviewTemplates: {
+      success: [
+        "이제 어떻게 써야 할지 감이 와요.\n답을 문장으로 옮기기 쉬워졌어요.",
+        "흐름이 생겨서 훨씬 덜 막막해졌어요."
+      ]
+    }
+  },
+  {
+    id: "mathfear",
+    name: "수학 공포 학생",
+    requestTemplates: [
+      "{task}만 보면 머리가 하얘져요...\n정말 기초부터 보여 주실 수 있을까요?",
+      "수학은 시작이 제일 무서워요.\n{task}에서 어디부터 봐야 할지 도와주세요."
+    ],
+    reviewTemplates: {
+      success: [
+        "생각보다 덜 무서웠어요.\n어디서 시작해야 하는지 보여서 좋았어요.",
+        "막막함이 줄었어요.\n이제 한 번은 손대 볼 수 있을 것 같아요."
+      ]
+    }
   }
 ];
 
@@ -89,5 +117,48 @@ export const achievements = [
     title: "평판의 시작",
     description: "서로 다른 Client 3명을 만났습니다.",
     check: (state) => state.metClientIds.size >= 3
+  },
+  {
+    id: "five-clears",
+    title: "신뢰 축적",
+    description: "의뢰를 5회 완료했습니다.",
+    check: (state) => state.completeCount >= 5
   }
+];
+
+export const marketClients = [
+  {
+    name: "새벽형 벼락치기",
+    bio: "시험 직전 압축 정리를 선호해요. 빠르게 핵심만 보는 스타일을 좋아합니다."
+  },
+  {
+    name: "개념파먹기",
+    bio: "왜 그런지 설명해 주는 Solver를 자주 찾습니다. 구조화 설명 선호."
+  },
+  {
+    name: "서술형공포증",
+    bio: "답은 아는데 쓰질 못하겠어요. 문장 흐름을 잡아주는 타입을 찾고 있어요."
+  },
+  {
+    name: "수학싫어하지만해야함",
+    bio: "수학은 무섭지만 해야 해요. 시작점을 보여주는 Solver가 필요합니다."
+  },
+  {
+    name: "오래기억하고싶다",
+    bio: "외우는 것보다 기억에 남는 표현을 좋아해요. 감각적인 정리를 선호합니다."
+  }
+];
+
+export const marketTrends = [
+  "요즘은 개념 정리형 Solver를 찾는 Client가 많습니다.",
+  "시험 기간이 가까워지며 벼락치기형 요청이 늘고 있습니다.",
+  "서술형 흐름 정리를 잘해 주는 Solver가 주목받고 있습니다.",
+  "수학 공포형 Client 사이에서 시작점을 잡아주는 설명이 인기를 얻고 있습니다."
+];
+
+export const socialLogTemplates = [
+  "{name} 님의 후기에서 '핵심이 잘 보인다'는 반응이 늘고 있습니다.",
+  "최근 시장에서 {name} 님 같은 구조화 설명형 Solver가 주목받고 있습니다.",
+  "{name} 님의 작업이 Client 사이에서 안정적이라는 평가를 받고 있습니다.",
+  "벼락치기형 Client 사이에서 {name} 님의 압축 정리 스타일이 언급되고 있습니다."
 ];
